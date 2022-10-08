@@ -42,7 +42,7 @@ public class Stream<T>
 }
 
 
-internal class StreamTests
+internal class __StreamTests__
 {
     [Test]
     public void Stream_TestNext_ReturnsCorrectValues()
