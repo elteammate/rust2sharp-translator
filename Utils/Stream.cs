@@ -93,4 +93,23 @@ internal class StreamTests
         Assert.IsFalse(stream.HasNext());
         Assert.IsFalse(fork.HasNext());
     }
+    
+    [Test]
+    public void Stream_TestTakeWhile_ReturnsCorrectValues()
+    {
+        var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
+        var result = stream.TakeWhile(x => x < 4).ToList();
+        Assert.AreEqual(new[] {1, 2, 3}, result);
+        Assert.AreEqual(4, stream.Next());
+        Assert.AreEqual(5, stream.Next());
+        Assert.IsFalse(stream.HasNext());
+    }
+    
+    [Test]
+    public void Stream_TestTakeWhile_ThrowsWhenStops()
+    {
+        var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
+        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+        Assert.Throws<Exception>(() => stream.TakeWhile(x => x < 10).ToArray());
+    }
 }
