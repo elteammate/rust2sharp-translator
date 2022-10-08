@@ -7,4 +7,20 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="PythonWebInterface\temp" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="PythonWebInterface\__pycache__\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="PythonWebInterface\__pycache__\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="PythonWebInterface\__pycache__\**" />
+    </ItemGroup>
+
 </Project>
