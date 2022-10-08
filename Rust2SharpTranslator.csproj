@@ -5,6 +5,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <StartupObject>Rust2SharpTranslator.Program</StartupObject>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,6 +22,11 @@
 
     <ItemGroup>
       <None Remove="PythonWebInterface\__pycache__\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+      <PackageReference Include="NUnit" Version="3.13.3" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using NUnit.Framework;
 
 namespace Translator.Utils;
 
@@ -37,5 +38,59 @@ public class Stream<T>
                 yield break;
             yield return Next();
         }
+    }
+}
+
+
+internal class StreamTests
+{
+    [Test]
+    public void Stream_TestNext_ReturnsCorrectValues()
+    {
+        var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
+        Assert.AreEqual(1, stream.Next());
+        Assert.AreEqual(2, stream.Next());
+        Assert.AreEqual(3, stream.Next());
+        Assert.AreEqual(4, stream.Next());
+        Assert.AreEqual(5, stream.Next());
+        Assert.IsFalse(stream.HasNext());
+    }
+    
+    [Test]
+    public void Stream_TestLookAhead_ReturnsCorrectValues()
+    {
+        var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
+        Assert.AreEqual(1, stream.LookAhead());
+        Assert.AreEqual(1, stream.Next());
+        Assert.AreEqual(2, stream.LookAhead());
+        Assert.AreEqual(2, stream.LookAhead());
+        Assert.AreEqual(2, stream.Next());
+        Assert.AreEqual(3, stream.LookAhead());
+        Assert.AreEqual(3, stream.Next());
+        Assert.AreEqual(4, stream.LookAhead());
+        Assert.AreEqual(4, stream.Next());
+        Assert.AreEqual(5, stream.LookAhead());
+        Assert.AreEqual(5, stream.LookAhead());
+        Assert.AreEqual(5, stream.Next());
+        Assert.IsFalse(stream.HasNext());
+    }
+    
+    [Test]
+    public void Stream_TestFork_ReturnsCorrectValues()
+    {
+        var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
+        var fork = stream.Fork();
+        Assert.AreEqual(1, stream.Next());
+        Assert.AreEqual(1, fork.Next());
+        Assert.AreEqual(2, stream.Next());
+        Assert.AreEqual(2, fork.Next());
+        Assert.AreEqual(3, stream.Next());
+        Assert.AreEqual(3, fork.Next());
+        Assert.AreEqual(4, stream.Next());
+        Assert.AreEqual(4, fork.Next());
+        Assert.AreEqual(5, stream.Next());
+        Assert.AreEqual(5, fork.Next());
+        Assert.IsFalse(stream.HasNext());
+        Assert.IsFalse(fork.HasNext());
     }
 }
