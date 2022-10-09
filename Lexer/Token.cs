@@ -1,4 +1,4 @@
-namespace Translator.Utils;
+namespace Rust2SharpTranslator.Lexer;
 
 public abstract record Token;
 

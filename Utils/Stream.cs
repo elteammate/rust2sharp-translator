@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using NUnit.Framework;
 
-namespace Translator.Utils;
+namespace Rust2SharpTranslator.Utils;
 
 public class EndOfStreamException : Exception
 {

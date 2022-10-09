@@ -1,4 +1,4 @@
-namespace Translator.Utils;
+namespace Rust2SharpTranslator.Lexer;
 
 public abstract class LexerException : Exception {
     protected LexerException(string message): base($"Lexer error: {message}") {}

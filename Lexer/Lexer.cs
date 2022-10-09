@@ -1,8 +1,9 @@
 using System.Globalization;
 using System.Text;
 using NUnit.Framework;
+using Rust2SharpTranslator.Utils;
 
-namespace Translator.Utils;
+namespace Rust2SharpTranslator.Lexer;
 
 public class Lexer
 {
