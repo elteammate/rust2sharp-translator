@@ -3,6 +3,11 @@ using NUnit.Framework;
 
 namespace Translator.Utils;
 
+public class EndOfStreamException : Exception
+{
+    public EndOfStreamException() : base("End of stream") { }
+}
+
 public class Stream<T>
 {
     public Stream(IEnumerable<T> data)
@@ -19,24 +24,66 @@ public class Stream<T>
     private ImmutableList<T> Data { get; }
     private int Index { get; set; }
     
-    public T Next() => Data[Index++];
+    private T? Get(int index)
+    {
+        if (index >= Data.Count)
+            return default;
+        return Data[index];
+    }
+    
+    public T? Next() => Get(Index++);
     
     public bool HasNext() => Index < Data.Count;
     
-    public T LookAhead() => Data[Index];
+    public T? Peek(int offset = 0) => Get(Index + offset);
     
     public Stream<T> Fork() => new(Data, Index);
     
+    public bool IfMatchConsume(T value)
+    {
+        if (!Peek()!.Equals(value)) return false;
+        Next();
+        return true;
+    }
+    
+    public Stream<T> Skip(int count = 1) {
+        Index += count;
+        return this;
+    }
+    
+    public IEnumerable<T> Take(int count)
+    {
+        for (var i = 0; i < count && HasNext(); i++)
+            yield return Next()!;
+    }
+
     public IEnumerable<T> TakeWhile(Predicate<T> predicate)
     {
         while (true)
         {
-            if (!HasNext())
-                throw new Exception("Stream has no more elements");
-
-            if (!predicate(LookAhead()))
+            if (!HasNext() || !predicate(Peek()!))
                 yield break;
-            yield return Next();
+            yield return Next()!;
+        }
+    }
+    
+    public IEnumerable<T> TakeUntil(T[] values)
+    {
+        while (true)
+        {
+            if (!HasNext() || Fork().Take(values.Length).SequenceEqual(values))
+                yield break;
+            yield return Next()!;
+        }
+    }
+
+    public void SkipWhile(Predicate<T> predicate)
+    {
+        while (true)
+        {
+            if (!HasNext() || !predicate(Peek()!))
+                return;
+            Next();
         }
     }
 }
@@ -60,17 +107,17 @@ internal class __StreamTests__
     public void Stream_TestLookAhead_ReturnsCorrectValues()
     {
         var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
-        Assert.AreEqual(1, stream.LookAhead());
+        Assert.AreEqual(1, stream.Peek());
         Assert.AreEqual(1, stream.Next());
-        Assert.AreEqual(2, stream.LookAhead());
-        Assert.AreEqual(2, stream.LookAhead());
+        Assert.AreEqual(2, stream.Peek());
+        Assert.AreEqual(2, stream.Peek());
         Assert.AreEqual(2, stream.Next());
-        Assert.AreEqual(3, stream.LookAhead());
+        Assert.AreEqual(3, stream.Peek());
         Assert.AreEqual(3, stream.Next());
-        Assert.AreEqual(4, stream.LookAhead());
+        Assert.AreEqual(4, stream.Peek());
         Assert.AreEqual(4, stream.Next());
-        Assert.AreEqual(5, stream.LookAhead());
-        Assert.AreEqual(5, stream.LookAhead());
+        Assert.AreEqual(5, stream.Peek());
+        Assert.AreEqual(5, stream.Peek());
         Assert.AreEqual(5, stream.Next());
         Assert.IsFalse(stream.HasNext());
     }
@@ -110,6 +157,6 @@ internal class __StreamTests__
     {
         var stream = new Stream<int>(new[] {1, 2, 3, 4, 5});
         // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-        Assert.Throws<Exception>(() => stream.TakeWhile(x => x < 10).ToArray());
+        Assert.Throws<EndOfStreamException>(() => stream.TakeWhile(x => x < 10).ToArray());
     }
 }
