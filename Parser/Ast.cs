@@ -9,10 +9,15 @@ public abstract record RsStatement : RsNode;
 public abstract record RsExpression : RsStatement;
 
 public record RsName(string Name) : RsExpression;
+public record RsUnderscore() : RsName("_");
+public record RsSelfType() : RsName("Self");
+public record RsSelf() : RsName("self");
+public record RsSuper() : RsName("super");
+public record RsCrate() : RsName("crate");
 
 public record RsLabel(string Name) : RsNode;
 
-public record RsPath(RsExpression[] Pieces) : RsExpression;
+public record RsPath(RsName Name, RsPath? Tail) : RsExpression;
 
 public abstract record RsType : RsNode;
 public record RsSimpleType(RsPath Path) : RsType;
@@ -36,13 +41,13 @@ public record RsMatch(RsExpression Value, RsMatchArm[] Arms) : RsExpression;
 
 public abstract record RsLiteral : RsExpression;
 
-public record RsLiteralString(string Value) : RsLiteral;
-public record RsLiteralByteString(string Value) : RsLiteral;
-public record RsLiteralByte(char Value) : RsLiteral;
-public record RsLiteralChar(char Value) : RsLiteral;
-public record RsLiteralInt(BigInteger Value) : RsLiteral;
-public record RsLiteralFloat(double Value) : RsLiteral;
-public record RsLiteralBool(bool Value) : RsLiteral;
+public record RsLiteralString(string Repr) : RsLiteral;
+public record RsLiteralByteString(string Repr) : RsLiteral;
+public record RsLiteralByte(string Repr) : RsLiteral;
+public record RsLiteralChar(string Repr) : RsLiteral;
+public record RsLiteralInt(string Repr) : RsLiteral;
+public record RsLiteralFloat(string Repr) : RsLiteral;
+public record RsLiteralBool(string Repr) : RsLiteral;
 public record RsLiteralUnit : RsLiteral;
 public record RsLiteralArray(RsExpression[] Elements) : RsLiteral;
 
@@ -78,6 +83,9 @@ public record RsLt(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Rig
 public record RsLe(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 public record RsGt(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 public record RsGe(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
+public record RsAs(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
+public record RsRange(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
+public record RsRangeInclusive(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 
 public record RsAssign(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 public record RsAssignAdd(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
