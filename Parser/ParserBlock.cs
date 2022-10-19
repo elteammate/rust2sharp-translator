@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using FluentAssertions;
+using NUnit.Framework;
 using Rust2SharpTranslator.Lexer;
 using Rust2SharpTranslator.Utils;
 
@@ -92,13 +94,139 @@ public partial class Parser
         return new RsLet(name, mut, type, value);
     }
 
-    public RsIf ParseIf() => throw new NotImplementedException();
+    public RsIf ParseIf()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.If));
+        
+        var condition = ParseExpression();
+        var thenClause = ParseBlock();
+        
 
-    public RsLoop ParseLoop() => throw new NotImplementedException();
+        if (!_stream.IfMatchConsume(new Keyword(KeywordType.Else)))
+            return new RsIf(condition, thenClause, null);
+        
+        RsExpression? elseClause;
+        
+        if (_stream.Peek() == new Keyword(KeywordType.If))
+            elseClause = ParseIf();
+        else
+            elseClause = ParseBlock();
+        
+        return new RsIf(condition, thenClause, elseClause);
+    }
+
+    public RsLoop ParseLoop()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.Loop));
+        return new RsLoop(ParseBlock());
+    }
 
     public RsWhile ParseWhile() => throw new NotImplementedException();
 
     public RsFor ParseFor() => throw new NotImplementedException();
 
     public RsMatch ParseMatch() => throw new NotImplementedException();
+}
+
+
+public class __ParserBlockTests__
+{
+    [Test]
+    public void ParserBlock_TestLetParsing()
+    {
+        new Parser(new Lexer.Lexer("let mut foo: &Bar<Bar> = 1 + 1;").Lex())
+            .ParseLet().Should().BeEquivalentTo(
+                    new RsLet(
+                        new RsName("foo"),
+                        true,
+                        new RsRef(
+                            false, 
+                            new RsWithGenerics(
+                                new RsName("Bar"),
+                                Array.Empty<RsLifetime>(),
+                                new[] {new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>()) }
+                            )
+                        ),
+                        new RsAdd(
+                            new RsLiteralInt("1"),
+                            new RsLiteralInt("1")
+                        )
+                    )
+                );
+    }
+
+    [Test]
+    public void ParserBlock_TestIfParsing()
+    {
+        new Parser(new Lexer.Lexer("if x == 0 {0} else if x == 1 {1} else {2}").Lex())
+            .ParseIf().Should().BeEquivalentTo(
+                new RsIf(
+                    new RsEq(new RsName("x"), new RsLiteralInt("0")),
+                    new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("0"))),
+                    new RsIf(
+                        new RsEq(new RsName("x"), new RsLiteralInt("1")),
+                        new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("1"))),
+                        new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("2")))
+                    )
+                ));
+    }
+
+    [Test]
+    public void ParserBlock_TestIfParsing2()
+    {
+        new Parser(new Lexer.Lexer("if x == 0 {0}").Lex())
+            .ParseIf().Should().BeEquivalentTo(
+                new RsIf(
+                    new RsEq(new RsName("x"), new RsLiteralInt("0")),
+                    new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("0"))),
+                    null
+                ));
+    }
+
+    [Test]
+    public void ParserBlock_TestLoopParsing()
+    {
+        new Parser(new Lexer.Lexer("x = loop { break 0; }").Lex())
+            .ParseExpression().Should().BeEquivalentTo(
+                new RsAssign(
+                    new RsName("x"),
+                    new RsLoop(
+                        new RsBlock(
+                            new RsStatement[] {new RsBreak(new RsLiteralInt("0"))},
+                            null
+                        )
+                    )
+                )
+                );
+    }
+
+    [Test]
+    public void ParserBlock_TestBlockParsing()
+    {
+        new Parser(new Lexer.Lexer("{ let mut foo: &Bar<Bar> = 1 + 1; }").Lex())
+            .ParseBlock().Should().BeEquivalentTo(
+                new RsBlock(
+                    new RsStatement[]
+                    {
+                        new RsLet(
+                            new RsName("foo"),
+                            true,
+                            new RsRef(
+                                false, 
+                                new RsWithGenerics(
+                                    new RsName("Bar"),
+                                    Array.Empty<RsLifetime>(),
+                                    new[] {new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>()) }
+                                )
+                            ),
+                            new RsAdd(
+                                new RsLiteralInt("1"),
+                                new RsLiteralInt("1")
+                            )
+                        )
+                    },
+                    null
+                )
+            );
+    }
 }

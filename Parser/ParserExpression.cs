@@ -170,7 +170,7 @@ public partial class Parser
     }
 
     public RsExpression ParseExpression(BinaryPrecedence precedence = BinaryPrecedence.Lowest) =>
-        ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), precedence);
+        ParseExpressionAfter(ParsePrimaryExpression(), precedence);
 
     private RsExpression ParseExpressionAfter(RsExpression expr, BinaryPrecedence precedence)
     {
@@ -186,7 +186,7 @@ public partial class Parser
 
             _stream.Skip();
 
-            var right = ParsePrimaryExpressionNoPrefixUnary();
+            var right = ParsePrimaryExpression();
 
             while (true)
             {
@@ -251,7 +251,8 @@ public partial class Parser
             PunctuationType.Comma or
             PunctuationType.CloseParen or
             PunctuationType.CloseBracket or
-            PunctuationType.CloseBrace
+            PunctuationType.CloseBrace or 
+            PunctuationType.OpenBrace
         };
 }
 

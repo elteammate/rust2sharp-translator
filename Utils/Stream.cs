@@ -42,7 +42,7 @@ public class Stream<T>
 
     public bool IfMatchConsume(T value)
     {
-        if (!Peek()!.Equals(value)) return false;
+        if (Peek() == null || !Peek()!.Equals(value)) return false;
         Next();
         return true;
     }
