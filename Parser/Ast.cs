@@ -18,25 +18,19 @@ public record RsCrate() : RsName("crate");
 public record RsLabel(string Name) : RsNode;
 
 public record RsPath(RsExpression? Prefix, RsName Name) : RsExpression;
-public record RsDot(RsExpression expr, RsType Name) : RsExpression;
+public record RsDot(RsExpression expr, RsName Name) : RsExpression;
 
-public abstract record RsType : RsNode;
-public record RsSimpleType(RsName name) : RsType;
-public record RsGenericType(RsName name, RsLifetime[] Lifetimes, RsGeneric[] Generics) : RsType;
-public record RsRefType(RsType Type, RsLifetime Lifetime, bool Mutable) : RsType;
-public record RsTupleType(RsType[] Types) : RsType;
-public record RsArrayType(RsType Type, int? Size) : RsType;
-
-public record RsLetDecl(RsName Name, bool? Mutable, RsType Type, RsExpression? Value) : RsStatement;
+public record RsLet(RsName Name, bool? Mutable, RsExpression? Type, RsExpression? Value) : RsStatement;
 
 public record RsIf(RsExpression Condition, RsExpression Then, RsExpression? Else) : RsExpression;
 public record RsLoop(RsExpression Body) : RsExpression;
-public record RsWhile(RsExpression Condition, RsStatement Body, RsLabel? Label) : RsExpression;
-public record RsFor(RsName Binding, RsExpression Iterator, RsStatement Body, RsLabel? Label) : RsExpression;
-public record RsBlock(RsStatement[] Statements, RsExpression? Expression, RsLabel? Label) : RsExpression;
-public record RsBreak(RsLabel? Label, RsExpression? Value) : RsExpression;
-public record RsContinue(RsLabel? Label) : RsExpression;
+public record RsWhile(RsExpression Condition, RsStatement Body) : RsExpression;
+public record RsFor(RsName Binding, RsExpression Iterator, RsStatement Body) : RsExpression;
+public record RsBlock(RsStatement[] Statements, RsExpression? Expression) : RsExpression;
+public record RsBreak(RsExpression? Value) : RsExpression;
+public record RsContinue() : RsExpression;
 public record RsReturn(RsExpression? Value) : RsExpression;
+public record RsEmptyStatement : RsStatement;
 
 public record RsMatchArm(RsExpression Pattern, RsExpression Body) : RsNode;
 public record RsMatch(RsExpression Value, RsMatchArm[] Arms) : RsExpression;
@@ -101,25 +95,25 @@ public record RsAssignBitXor(RsExpression Left, RsExpression Right) : RsBinaryOp
 public record RsAssignShl(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 public record RsAssignShr(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 
-public record RsGeneric(RsName Name, RsType[] Bounds) : RsNode;
+public record RsGeneric(RsName Name, RsExpression[] Bounds) : RsNode;
 public record RsLifetime(RsLabel Name, RsLabel[] Bounds) : RsNode;
 
-public record RsStructField(RsName Name, RsType Type) : RsNode;
+public record RsStructField(RsName Name, RsExpression Type) : RsNode;
 public record RsStruct(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsStructField[] Fields) : RsExpression;
 
 public record RsEnum(RsName Name, RsStruct[] Variants) : RsNode;
 
-public record RsParameter(RsName Name, RsType Type) : RsNode;
-public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsParameter[] Parameters, RsType ReturnType, RsExpression? Body) : RsNode;
+public record RsParameter(RsName Name, RsExpression Type) : RsNode;
+public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsParameter[] Parameters, RsExpression ReturnType, RsExpression? Body) : RsNode;
 
 public record RsTrait(RsName Name, RsFunction[] Functions) : RsNode;
 
-public record RsImpl(RsType Type, RsTrait Trait, RsFunction[] Functions) : RsNode;
+public record RsImpl(RsExpression Type, RsTrait Trait, RsFunction[] Functions) : RsNode;
 
 public record RsModule(RsPath Path, RsNode[] Nodes) : RsNode;
 
 public record RsUse(RsPath Path) : RsNode;
 
-public record RsTypeDecl(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsType Definition) : RsNode;
+public record RsTypeDecl(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsExpression Definition) : RsNode;
 
-public record RsClosure(RsParameter[] Parameters, RsType? ReturnType, RsExpression Body) : RsExpression;
+public record RsClosure(RsParameter[] Parameters, RsExpression? ReturnType, RsExpression Body) : RsExpression;

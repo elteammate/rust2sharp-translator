@@ -169,9 +169,9 @@ public partial class Parser
         };
     }
 
-    public RsExpression ParseExpression()
+    public RsExpression ParseExpression(BinaryPrecedence precedence = BinaryPrecedence.Lowest)
     {
-        return ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), BinaryPrecedence.Lowest);
+        return ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), precedence);
     }
 
     private RsExpression ParseExpressionAfter(RsExpression expr, BinaryPrecedence precedence)

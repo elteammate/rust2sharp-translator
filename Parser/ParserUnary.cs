@@ -50,7 +50,7 @@ public partial class Parser
             switch (token)
             {
                 case Identifier:
-                    generics.Add(new RsGeneric(ParseName(), Array.Empty<RsType>()));
+                    generics.Add(new RsGeneric(ParseName(), Array.Empty<RsExpression>()));
                     break;
                 case Literal { Type: LiteralType.Label } label:
                     lifetimes.Add(new RsLifetime(new RsLabel(label.Value), Array.Empty<RsLabel>()));
@@ -259,10 +259,6 @@ public partial class Parser
                 return ParseIf();
             case Keyword {Value: KeywordType.Loop}:
                 return ParseLoop();
-            case Keyword {Value: KeywordType.While}:
-                return ParseWhile();
-            case Keyword {Value: KeywordType.For}:
-                return ParseFor();
             case Keyword {Value: KeywordType.Match}:
                 return ParseMatch();
             default:
@@ -305,7 +301,10 @@ public class __TestParserPrimary__
                                 new RsLiteralInt("2")
                             }), new RsName("bar")),
                         Array.Empty<RsLifetime>(),
-                        new[] { new RsGeneric(new RsName("T"), Array.Empty<RsType>()) }
+                        new[] { new RsGeneric(
+                            new RsName("T"), 
+                            Array.Empty<RsExpression>()
+                            ) }
                         ),
                     new (RsName, RsExpression)[]
                     {
