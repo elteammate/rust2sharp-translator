@@ -17,10 +17,12 @@ public record RsCrate() : RsName("crate");
 
 public record RsLabel(string Name) : RsNode;
 
-public record RsPath(RsName Name, RsPath? Tail) : RsExpression;
+public record RsPath(RsExpression? Prefix, RsName Name) : RsExpression;
+public record RsDot(RsExpression expr, RsType Name) : RsExpression;
 
 public abstract record RsType : RsNode;
-public record RsSimpleType(RsPath Path) : RsType;
+public record RsSimpleType(RsName name) : RsType;
+public record RsGenericType(RsName name, RsLifetime[] Lifetimes, RsGeneric[] Generics) : RsType;
 public record RsRefType(RsType Type, RsLifetime Lifetime, bool Mutable) : RsType;
 public record RsTupleType(RsType[] Types) : RsType;
 public record RsArrayType(RsType Type, int? Size) : RsType;
@@ -31,7 +33,7 @@ public record RsIf(RsExpression Condition, RsExpression Then, RsExpression? Else
 public record RsLoop(RsExpression Body) : RsExpression;
 public record RsWhile(RsExpression Condition, RsStatement Body, RsLabel? Label) : RsExpression;
 public record RsFor(RsName Binding, RsExpression Iterator, RsStatement Body, RsLabel? Label) : RsExpression;
-public record RsBlock(RsStatement[] Statements, RsExpression Expression, RsLabel? Label) : RsExpression;
+public record RsBlock(RsStatement[] Statements, RsExpression? Expression, RsLabel? Label) : RsExpression;
 public record RsBreak(RsLabel? Label, RsExpression? Value) : RsExpression;
 public record RsContinue(RsLabel? Label) : RsExpression;
 public record RsReturn(RsExpression? Value) : RsExpression;
@@ -54,13 +56,13 @@ public record RsLiteralArray(RsExpression[] Elements) : RsLiteral;
 public record RsCall(RsExpression Function, RsExpression[] Arguments) : RsExpression;
 public record RsIndex(RsExpression Value, RsExpression Index) : RsExpression;
 public record RsField(RsExpression Value, RsName Field) : RsExpression;
+public record RsConstructor(RsExpression Type, (RsName, RsExpression)[] Parameters) : RsExpression;
+public record RsWithGenerics(RsExpression Value, RsLifetime[] Lifetimes, RsGeneric[] Generics) : RsExpression;
 
 public abstract record RsUnaryOp(RsExpression Arg) : RsExpression;
 public abstract record RsBinaryOp(RsExpression Left, RsExpression Right) : RsExpression;
 
 public record RsNot(RsExpression Arg) : RsUnaryOp(Arg);
-public record RsTilde(RsExpression Arg) : RsUnaryOp(Arg);
-public record RsUnaryPlus(RsExpression Arg) : RsUnaryOp(Arg);
 public record RsUnaryMinus(RsExpression Arg) : RsUnaryOp(Arg);
 public record RsDeref(RsExpression Arg) : RsUnaryOp(Arg);
 public record RsRef(bool Mutable, RsExpression Arg) : RsUnaryOp(Arg);
@@ -100,7 +102,7 @@ public record RsAssignShl(RsExpression Left, RsExpression Right) : RsBinaryOp(Le
 public record RsAssignShr(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 
 public record RsGeneric(RsName Name, RsType[] Bounds) : RsNode;
-public record RsLifetime(RsLabel Name) : RsNode;
+public record RsLifetime(RsLabel Name, RsLabel[] Bounds) : RsNode;
 
 public record RsStructField(RsName Name, RsType Type) : RsNode;
 public record RsStruct(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsStructField[] Fields) : RsExpression;

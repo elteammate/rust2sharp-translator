@@ -171,7 +171,7 @@ public partial class Parser
 
     public RsExpression ParseExpression()
     {
-        return ParseExpressionAfter(ParsePrimaryExpression(), BinaryPrecedence.Lowest);
+        return ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), BinaryPrecedence.Lowest);
     }
 
     private RsExpression ParseExpressionAfter(RsExpression expr, BinaryPrecedence precedence)
@@ -188,7 +188,7 @@ public partial class Parser
 
             _stream.Skip();
 
-            var right = ParsePrimaryExpression();
+            var right = ParsePrimaryExpressionNoPrefixUnary();
 
             while (true)
             {
@@ -266,13 +266,13 @@ internal class __ParserExpressionTests__
     {
         var parser = new Parser(new Lexer.Lexer("1 + 2 * 3;").Lex());
         var expr = parser.ParseExpression();
-        Assert.AreEqual(expr, new RsAdd(
+        Assert.AreEqual(new RsAdd(
             new RsLiteralInt("1"),
             new RsMul(
                 new RsLiteralInt("2"),
                 new RsLiteralInt("3")
             )
-        ));
+        ), expr);
     }
     
     [Test]
@@ -280,13 +280,13 @@ internal class __ParserExpressionTests__
     {
         var parser = new Parser(new Lexer.Lexer("a = b = c").Lex());
         var expr = parser.ParseExpression();
-        Assert.AreEqual(expr, new RsAssign(
+        Assert.AreEqual(new RsAssign(
             new RsName("a"),
             new RsAssign(
                 new RsName("b"),
                 new RsName("c")
             )
-        ));
+        ), expr);
     }
     
     [Test]
@@ -294,12 +294,12 @@ internal class __ParserExpressionTests__
     {
         var parser = new Parser(new Lexer.Lexer("a + b + c").Lex());
         var expr = parser.ParseExpression();
-        Assert.AreEqual(expr, new RsAdd(
+        Assert.AreEqual(new RsAdd(
             new RsAdd(
                 new RsName("a"),
                 new RsName("b")
             ),
             new RsName("c")
-        ));
+        ), expr);
     }
 }

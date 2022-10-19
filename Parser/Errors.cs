@@ -15,5 +15,5 @@ public class UnexpectedEndOfStreamException : ParserException {
 }
 
 public class UnexpectedTokenException : ParserException {
-    public UnexpectedTokenException(Token token): base($"Unexpected punctuation: {token}") {}
+    public UnexpectedTokenException(Token? token): base($"Unexpected punctuation: {token}") {}
 }
