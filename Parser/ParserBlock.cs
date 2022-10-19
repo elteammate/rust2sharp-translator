@@ -121,11 +121,58 @@ public partial class Parser
         return new RsLoop(ParseBlock());
     }
 
-    public RsWhile ParseWhile() => throw new NotImplementedException();
+    public RsWhile ParseWhile()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.While));
+        
+        var condition = ParseExpression();
+        var body = ParseBlock();
+        
+        return new RsWhile(condition, body);
+    }
 
-    public RsFor ParseFor() => throw new NotImplementedException();
+    public RsFor ParseFor()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.For));
+        
+        var name = ParseName();
+        
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.In));
+        
+        var iterable = ParseExpression();
+        var body = ParseBlock();
+        
+        return new RsFor(name, iterable, body);
+    }
 
-    public RsMatch ParseMatch() => throw new NotImplementedException();
+    public RsMatch ParseMatch()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.Match));
+        
+        var expression = ParseExpression();
+        Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.OpenBrace));
+        
+        var arms = new List<RsMatchArm>();
+        
+        while (_stream.Peek() != new Punctuation(PunctuationType.CloseBrace))
+        {
+            var pattern = ParseExpression();
+            Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.FatArrow));
+            if (_stream.Peek() == new Punctuation(PunctuationType.OpenBrace))
+                arms.Add(new RsMatchArm(pattern, ParseBlock()));
+            else
+                arms.Add(new RsMatchArm(
+                    pattern, 
+                    new RsBlock(new RsStatement[] { new RsReturn(ParseExpression()) }, null)
+                    ));
+        }
+        
+        Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.CloseBrace));
+        
+        return new RsMatch(expression, arms.ToArray());
+    }
+    
+    
 }
 
 
@@ -198,6 +245,21 @@ public class __ParserBlockTests__
                     )
                 )
                 );
+    }
+    
+    [Test]
+    public void TestWhileParsing()
+    {
+        new Parser(new Lexer.Lexer("while x < 10 { x += 1; }").Lex())
+            .ParseWhile().Should().BeEquivalentTo(
+                new RsWhile(
+                    new RsLt(new RsName("x"), new RsLiteralInt("10")),
+                    new RsBlock(
+                        new RsStatement[] {new RsAssign(new RsName("x"), new RsAdd(new RsName("x"), new RsLiteralInt("1")))},
+                        null
+                    )
+                )
+            );
     }
 
     [Test]

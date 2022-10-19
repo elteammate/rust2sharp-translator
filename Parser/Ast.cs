@@ -22,8 +22,6 @@ public record RsLabel(string Name) : RsNode;
 
 public record RsPath(RsExpression? Prefix, RsName Name) : RsExpression;
 
-public record RsDot(RsExpression expr, RsName Name) : RsExpression;
-
 public record RsLet
     (RsName Name, bool? Mutable, RsExpression? Type, RsExpression? Value) : RsStatement;
 
