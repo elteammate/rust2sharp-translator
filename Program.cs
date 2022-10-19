@@ -16,7 +16,7 @@ public static class Program
         }
         catch (FileNotFoundException e)
         {
-            Console.WriteLine("Input file does not exist: " + e.Message);   
+            Console.WriteLine("Input file does not exist: " + e.Message);
             return -1;
         }
         catch (IOException e)
@@ -28,7 +28,6 @@ public static class Program
         var output = Translator.Translate(input);
 
         if (args.Length > 1)
-        {
             try
             {
                 File.WriteAllText(args[1], output);
@@ -38,12 +37,9 @@ public static class Program
                 Console.WriteLine("Error writing file: " + e.Message);
                 return -1;
             }
-        }
         else
-        {
             Console.WriteLine(output);
-        }
-        
+
         return 0;
     }
 }

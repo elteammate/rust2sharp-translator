@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Rust to C# translator</title>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.11.2/ace.js" integrity="sha512-AhCq6G80Ge/e6Pl3QTNGI2Je+6ixVVDmmE4Nui8/dHRBKxMUvjJxn6CYEcMQdTSxHreC3USOxTDrvUPLtN5J7w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-AhCq6G80Ge/e6Pl3QTNGI2Je+6ixVVDmmE4Nui8/dHRBKxMUvjJxn6CYEcMQdTSxHreC3USOxTDrvUPLtN5J7w=="
+            referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.11.2/ace.js"></script>
     <style>
         #editors {
             display: flex;
             height: 100%;
         }
-        
+
         #controls {
             display: flex;
             padding: 5px;
             background-color: aliceblue;
             width: 100%;
         }
-        
+
         .editor {
             flex: 1;
             height: 100%;
@@ -27,124 +31,124 @@
     </style>
 </head>
 <body>
-    <div id="controls">
-        <label id="save-test">
-            Sample name:
-            <input id="sample-name"/>
-            <button id="sample-save">Save</button>
-        </label>
-        <span style="width: 50px;"></span>
-        <label>
-            Open sample:
-            <select>
-            </select>
-            <button id="sample-delete">Delete</button>
-        </label>
-    </div>
-    <div id="editors">
-        <div class="editor" id="rust-source"></div>
-        <div class="editor" id="csharp-result"></div>
-        <div class="editor" id="csharp-expected"></div>
-    </div>
-    <div id="errors">
-        
-    </div>
-    
-    <script>
-        const sampleSelect = document.querySelector('#controls select');
-        const rustEditor = document.getElementById("rust-source");
-        const sharpResultEditor = document.getElementById("csharp-result");
-        const sharpExpectedEditor = document.getElementById("csharp-expected");
-        const errors = document.getElementById("errors");
-        const sampleNameBox = document.getElementById("sample-name");
-        
-        let rustEditorAce = ace.edit("rust-source");
-        rustEditorAce.session.setMode("ace/mode/rust");
+<div id="controls">
+    <label id="save-test">
+        Sample name:
+        <input id="sample-name"/>
+        <button id="sample-save">Save</button>
+    </label>
+    <span style="width: 50px;"></span>
+    <label>
+        Open sample:
+        <select>
+        </select>
+        <button id="sample-delete">Delete</button>
+    </label>
+</div>
+<div id="editors">
+    <div class="editor" id="rust-source"></div>
+    <div class="editor" id="csharp-result"></div>
+    <div class="editor" id="csharp-expected"></div>
+</div>
+<div id="errors">
 
-        let sharpEditorAce = ace.edit("csharp-result");
-        sharpEditorAce.session.setMode("ace/mode/csharp");
+</div>
 
-        let sharpExpectedAce = ace.edit("csharp-expected");
-        sharpExpectedAce.session.setMode("ace/mode/csharp");
-        
-        fetch("/samples")
+<script>
+    const sampleSelect = document.querySelector('#controls select');
+    const rustEditor = document.getElementById("rust-source");
+    const sharpResultEditor = document.getElementById("csharp-result");
+    const sharpExpectedEditor = document.getElementById("csharp-expected");
+    const errors = document.getElementById("errors");
+    const sampleNameBox = document.getElementById("sample-name");
+
+    let rustEditorAce = ace.edit("rust-source");
+    rustEditorAce.session.setMode("ace/mode/rust");
+
+    let sharpEditorAce = ace.edit("csharp-result");
+    sharpEditorAce.session.setMode("ace/mode/csharp");
+
+    let sharpExpectedAce = ace.edit("csharp-expected");
+    sharpExpectedAce.session.setMode("ace/mode/csharp");
+
+    fetch("/samples")
+        .then(response => response.json())
+        .then(samples => {
+            for (const sample of samples) {
+                const option = document.createElement("option");
+                option.value = sample;
+                option.innerText = sample;
+                sampleSelect.appendChild(option);
+            }
+        });
+
+    sampleSelect.addEventListener("change", () => {
+        const name = sampleSelect.value;
+        fetch(`/samples/${name}`)
             .then(response => response.json())
-            .then(samples => {
-                for (const sample of samples) {
-                    const option = document.createElement("option");
-                    option.value = sample;
-                    option.innerText = sample;
-                    sampleSelect.appendChild(option);
+            .then(sample => {
+                rustEditorAce.setValue(sample.source);
+                sharpExpectedAce.setValue(sample.expected);
+                sampleNameBox.value = name;
+                translate();
+            });
+    });
+
+    document.getElementById("sample-save").addEventListener("click", () => {
+        const name = sampleNameBox.value;
+        const source = rustEditorAce.getValue();
+        const expected = sharpExpectedAce.getValue();
+        fetch(`/samples/${name}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                source,
+                expected
+            })
+        });
+
+        const option = document.createElement("option");
+        option.value = name;
+        option.innerText = name;
+        sampleSelect.appendChild(option);
+    });
+
+    document.getElementById("sample-delete").addEventListener("click", () => {
+        const name = sampleSelect.value;
+        fetch(`/samples/${name}`, {
+            method: "DELETE"
+        });
+
+        sampleSelect.removeChild(sampleSelect.querySelector(`option[value="${name}"]`));
+    });
+
+    function translate() {
+        let source = rustEditorAce.getValue();
+        let expected = sharpExpectedAce.getValue();
+
+        fetch("/translate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({source: source, expected: expected})
+        })
+            .then(response => response.json())
+            .then(result => {
+                sharpResultEditor.innerText = result.result;
+                errors.innerText = result.errors;
+                if (result.valid) {
+                    document.body.style.backgroundColor = "#e0ffe0";
+                } else {
+                    document.body.style.backgroundColor = "#ffe7e7";
                 }
             });
-        
-        sampleSelect.addEventListener("change", () => {
-            const name = sampleSelect.value;
-            fetch(`/samples/${name}`)
-                .then(response => response.json())
-                .then(sample => {
-                    rustEditorAce.setValue(sample.source);
-                    sharpExpectedAce.setValue(sample.expected);
-                    sampleNameBox.value = name;
-                    translate();
-                });
-        });
-        
-        document.getElementById("sample-save").addEventListener("click", () => {
-            const name = sampleNameBox.value;
-            const source = rustEditorAce.getValue();
-            const expected = sharpExpectedAce.getValue();
-            fetch(`/samples/${name}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    source,
-                    expected
-                })
-            });
-            
-            const option = document.createElement("option");
-            option.value = name;
-            option.innerText = name;
-            sampleSelect.appendChild(option);
-        });
-        
-        document.getElementById("sample-delete").addEventListener("click", () => {
-            const name = sampleSelect.value;
-            fetch(`/samples/${name}`, {
-                method: "DELETE"
-            });
-            
-            sampleSelect.removeChild(sampleSelect.querySelector(`option[value="${name}"]`));
-        });
-        
-        function translate() {
-            let source = rustEditorAce.getValue();
-            let expected = sharpExpectedAce.getValue();
+    }
 
-            fetch("/translate", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ source: source, expected: expected })
-            })
-                .then(response => response.json())
-                .then(result => {
-                    sharpResultEditor.innerText = result.result;
-                    errors.innerText = result.errors;
-                    if (result.valid) {
-                        document.body.style.backgroundColor = "#e0ffe0";
-                    } else {
-                        document.body.style.backgroundColor = "#ffe7e7";
-                    }
-                });
-        }
-
-        rustEditor.addEventListener("keyup", translate);
-        sharpExpectedEditor.addEventListener("keyup", translate);
-    </script>
+    rustEditor.addEventListener("keyup", translate);
+    sharpExpectedEditor.addEventListener("keyup", translate);
+</script>
 </body>
 </html>

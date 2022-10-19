@@ -4,7 +4,10 @@ public static class Consumers
 {
     public static bool IsSpace(char c) => c is ' ' or '\t' or '\r' or '\n';
     public static bool IsDigit(char c) => c is >= '0' and <= '9';
-    public static bool IsHexDigit(char c) => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F';
+
+    public static bool IsHexDigit(char c) =>
+        c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F';
+
     public static bool IsLetter(char c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
     public static bool IsLetterOrDigit(char c) => IsLetter(c) || IsDigit(c);
     public static bool IsIdentifierStart(char c) => IsLetter(c) || c == '_';
@@ -13,14 +16,15 @@ public static class Consumers
     public static bool IsPunctuation(char c) => c is
         '+' or '-' or '*' or '/' or '%' or '&' or '|' or
         '^' or '!' or '~' or '=' or '<' or '>' or '.' or
-        ',' or ';' or '@' or ':' or '#' or '$' or '?' or 
+        ',' or ';' or '@' or ':' or '#' or '$' or '?' or
         '(' or ')' or '{' or '}' or '[' or ']';
-    
-    public static bool IsStackablePunctuation(char c) => c is 
-        '+' or '-' or '*' or '/' or '%' or '&' or '|' or 
+
+    public static bool IsStackablePunctuation(char c) => c is
+        '+' or '-' or '*' or '/' or '%' or '&' or '|' or
         '^' or '~' or '=' or '<' or '>' or '.' or ':';
-    
-    public static bool IsSingleCharPunctuation(char c) => IsPunctuation(c) && !IsStackablePunctuation(c);
+
+    public static bool IsSingleCharPunctuation(char c) =>
+        IsPunctuation(c) && !IsStackablePunctuation(c);
 
     public static KeywordType? TryGetKeyword(string identifierOrKeyword) =>
         identifierOrKeyword switch

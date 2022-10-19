@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
-import translator
+
 import sample_manager
+import translator
 
 app = Flask(__name__)
 app.template_folder = '.'

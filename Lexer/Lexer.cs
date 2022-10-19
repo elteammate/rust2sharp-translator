@@ -13,7 +13,7 @@ public class Lexer
     {
         _stream = new Stream<char>(input);
     }
-    
+
     private char ReadEscapedChar()
     {
         var c = _stream.Next();
@@ -40,7 +40,7 @@ public class Lexer
 
         if (!_stream.HasNext())
             return null;
-        
+
         if (_stream.IfMatchConsume('\''))
         {
             var c = ReadEscapedChar();
@@ -62,6 +62,7 @@ public class Lexer
                 if (!_stream.HasNext())
                     throw new UnterminatedStringLiteralException();
             }
+
             return new Literal(LiteralType.String, builder.ToString());
         }
 
@@ -71,7 +72,7 @@ public class Lexer
             var c = ReadEscapedChar();
             if (_stream.IfMatchConsume('\''))
                 return new Literal(LiteralType.Byte, ((byte)c).ToString());
-            
+
             throw new UnterminatedStringLiteralException();
         }
 
@@ -85,6 +86,7 @@ public class Lexer
                 if (!_stream.HasNext())
                     throw new UnterminatedStringLiteralException();
             }
+
             return new Literal(LiteralType.ByteString, builder.ToString());
         }
 
@@ -92,8 +94,8 @@ public class Lexer
         {
             var identifier = string.Join("", _stream.TakeWhile(Consumers.IsIdentifierPart));
             var keyword = Consumers.TryGetKeyword(identifier);
-            return keyword == null 
-                ? new Identifier(identifier) 
+            return keyword == null
+                ? new Identifier(identifier)
                 : new Keyword(keyword.Value);
         }
 
@@ -106,7 +108,7 @@ public class Lexer
                 var fraction = string.Join("", _stream.TakeWhile(Consumers.IsDigit));
                 return new Literal(LiteralType.Float, number + "." + fraction);
             }
-            
+
             return new Literal(LiteralType.Integer, number);
         }
 
@@ -125,7 +127,7 @@ public class Lexer
                 return new Comment(CommentType.Line,
                     string.Join("", _stream.TakeWhile(c => c != '\n')));
             }
-            
+
             if (_stream.Peek(1) == '*')
             {
                 if (_stream.Peek(2) == '*')
@@ -134,7 +136,9 @@ public class Lexer
                     var content = string.Join("", _stream.TakeUntil("*/".ToCharArray()));
                     _stream.Skip(2);
                     return new Comment(CommentType.DocBlock, content);
-                } else {
+                }
+                else
+                {
                     _stream.Skip(2);
                     var content = string.Join("", _stream.TakeUntil("*/".ToCharArray()));
                     _stream.Skip(2);
@@ -145,17 +149,17 @@ public class Lexer
 
         if (Consumers.IsPunctuation(_stream.Peek()))
         {
-            var punctuation = Consumers.IsStackablePunctuation(_stream.Peek()) ? 
-                string.Join("", _stream.TakeWhile(Consumers.IsStackablePunctuation)) : 
-                _stream.Next().ToString();
+            var punctuation = Consumers.IsStackablePunctuation(_stream.Peek())
+                ? string.Join("", _stream.TakeWhile(Consumers.IsStackablePunctuation))
+                : _stream.Next().ToString();
 
             var op = Consumers.TryGetPunctuation(punctuation);
             if (op == null)
                 throw new UndefinedPunctuationException(punctuation);
-            
+
             return new Punctuation(op.Value);
         }
-        
+
         throw new UnexpectedCharacterException(_stream.Next());
     }
 
@@ -173,7 +177,6 @@ public class Lexer
         return tokens;
     }
 }
-
 
 public static class __LexerTests__
 {
@@ -204,7 +207,7 @@ public static class __LexerTests__
             println!(""{}"", z);
         }
         ";
-        
+
         var tokens = new Stream<Token>(new Lexer(program).Lex());
         Assert.AreEqual(new Keyword(KeywordType.Use), tokens.Next());
         Assert.AreEqual(new Identifier("std"), tokens.Next());

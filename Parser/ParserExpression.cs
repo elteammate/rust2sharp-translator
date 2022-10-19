@@ -6,6 +6,12 @@ namespace Rust2SharpTranslator.Parser;
 
 public partial class Parser
 {
+    public enum Associativity
+    {
+        Left,
+        Right
+    }
+
     // https://doc.rust-lang.org/reference/expressions.html
     public enum BinaryPrecedence
     {
@@ -21,7 +27,7 @@ public partial class Parser
         Shift, // <<, >>
         Add, // +, -
         Mul, // *, /, %
-        As, // as
+        As // as
     }
 
     public enum Operator
@@ -58,12 +64,6 @@ public partial class Parser
         Div,
         Mod,
         As
-    }
-
-    public enum Associativity
-    {
-        Left,
-        Right
     }
 
     private static Operator GetOperator(Token token)
@@ -169,10 +169,8 @@ public partial class Parser
         };
     }
 
-    public RsExpression ParseExpression(BinaryPrecedence precedence = BinaryPrecedence.Lowest)
-    {
-        return ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), precedence);
-    }
+    public RsExpression ParseExpression(BinaryPrecedence precedence = BinaryPrecedence.Lowest) =>
+        ParseExpressionAfter(ParsePrimaryExpressionNoPrefixUnary(), precedence);
 
     private RsExpression ParseExpressionAfter(RsExpression expr, BinaryPrecedence precedence)
     {
@@ -246,9 +244,8 @@ public partial class Parser
         return expr;
     }
 
-    private static bool IsTerminator(Token? token)
-    {
-        return token is null or Punctuation
+    private static bool IsTerminator(Token? token) =>
+        token is null or Punctuation
         {
             Value: PunctuationType.Semi or
             PunctuationType.Comma or
@@ -256,7 +253,6 @@ public partial class Parser
             PunctuationType.CloseBracket or
             PunctuationType.CloseBrace
         };
-    }
 }
 
 internal class __ParserExpressionTests__
@@ -274,7 +270,7 @@ internal class __ParserExpressionTests__
             )
         ), expr);
     }
-    
+
     [Test]
     public void Parser_Expressions_TestRightAssociativity()
     {
@@ -288,7 +284,7 @@ internal class __ParserExpressionTests__
             )
         ), expr);
     }
-    
+
     [Test]
     public void Parser_Expressions_TestLeftAssociativity()
     {
