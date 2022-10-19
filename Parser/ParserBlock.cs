@@ -201,6 +201,20 @@ public class __ParserBlockTests__
     }
 
     [Test]
+    public void ParserBlock_TestLoopParsing2()
+    {
+        new Parser(new Lexer.Lexer("loop { }").Lex())
+            .ParseExpression().Should().BeEquivalentTo(
+                new RsLoop(
+                    new RsBlock(
+                        Array.Empty<RsStatement>(),
+                        null
+                    )
+                )
+            );
+    }
+
+    [Test]
     public void ParserBlock_TestBlockParsing()
     {
         new Parser(new Lexer.Lexer("{ let mut foo: &Bar<Bar> = 1 + 1; }").Lex())
