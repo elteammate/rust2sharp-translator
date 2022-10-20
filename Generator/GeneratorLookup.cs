@@ -56,10 +56,18 @@ public partial class Generator
                 GenerateParameter(parameter);
                 break;
             
-            case RsBlock block when _context != TranslationContext.Expression:
+            case RsBlock block when _context == TranslationContext.Module:
                 GenerateBlock(block);
                 break;
+
+            case RsExpression expression when _context == TranslationContext.Function:
+                GenerateExpressionStatement(expression);
+                break;
             
+            case RsLet let:
+                GenerateLet(let);
+                break;
+
             default:
                 AddLine($"// Not implmented yet: {node}");
                 break;

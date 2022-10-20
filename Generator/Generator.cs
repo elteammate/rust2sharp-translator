@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text;
 using Rust2SharpTranslator.Parser;
 using Rust2SharpTranslator.Utils;
@@ -12,7 +13,9 @@ public partial class Generator
     private int _indentLevel;
 
     private Stack<Dictionary<string, string>> _scopes = new();
+    
     private bool _builderEndedLine = true;
+    private readonly Stack<int> _waypoints = new();
 
     public Generator(RsNode node)
     {
@@ -97,13 +100,35 @@ public partial class Generator
         
         foreach (var c in str)
         {
-            if (c != '%')
-                _builder.Append(c);
-            else
-                Generate(itemStream.Next().Unwrap());
+            switch (c)
+            {
+                case '%':
+                    Generate(itemStream.Next().Unwrap());
+                    break;
+                case '|':
+                    _waypoints.Push(_builder.Length);
+                    break;
+                default:
+                    _builder.Append(c);
+                    break;
+            }
         }
         
         _builderEndedLine = str.Length > 0 && str[^1] == '\n';
+    }
+
+    private void AddAtWaypoint(string str, params RsNode[] items)
+    {
+        var waypoint = _waypoints.Pop();
+        var oldBuilderEndedLine = _builderEndedLine;
+        _builderEndedLine = false;
+        
+        var old = _builder.ToString(waypoint, _builder.Length - waypoint);
+        _builder.Remove(waypoint, _builder.Length - waypoint);
+        Add(str, items);
+
+        _builder.Append(old);
+        _builderEndedLine = oldBuilderEndedLine;
     }
 
     private void AddJoined(
@@ -158,20 +183,25 @@ public partial class Generator
 
     private string FindName(string name) => TryFindName(name) ?? name;
 
-    private string RegisterName(RsName name)
+    private int _nameCounter = 0;
+    
+    private void RegisterName(RsName name)
     {
         if (!ContainsName(name.Name))
         {
-            _scopes.Peek().Add(name.Name, name.Name);
-            return name.Name;
+            _scopes.Peek()[$"${_nameCounter++}${name.Name}"] = name.Name;
+            _scopes.Peek()[name.Name] = name.Name;
+            return;
         }
+        
         var suffix = 1;
         while (ContainsName(name.Name + suffix))
             suffix++;
 
         var result = name.Name + suffix;
+        
+        _scopes.Peek()[$"${_nameCounter++}${name.Name}"] = result;
         _scopes.Peek()[name.Name] = result;
-        return result;
     }
 
     private static string ToCamelCase(string name)

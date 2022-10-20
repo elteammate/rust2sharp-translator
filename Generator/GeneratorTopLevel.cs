@@ -24,7 +24,7 @@ public partial class Generator
         else
             GenerateBlock(function.Body);
     }
-    
+
     private void GenerateTopLevel(RsModule module)
     {
         var rootModule = new RsModule(new RsName("crate"), module.Nodes);
