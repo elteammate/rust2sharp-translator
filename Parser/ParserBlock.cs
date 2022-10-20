@@ -165,6 +165,8 @@ public partial class Parser
                     pattern, 
                     new RsBlock(new RsStatement[] { new RsReturn(ParseExpression()) }, null)
                     ));
+
+            _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
         
         Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.CloseBrace));
@@ -246,7 +248,21 @@ public class __ParserBlockTests__
                 )
                 );
     }
-    
+
+    [Test]
+    public void ParserBlock_TestLoopParsing2()
+    {
+        new Parser(new Lexer.Lexer("loop { }").Lex())
+            .ParseExpression().Should().BeEquivalentTo(
+                new RsLoop(
+                    new RsBlock(
+                        Array.Empty<RsStatement>(),
+                        null
+                    )
+                )
+            );
+    }
+
     [Test]
     public void TestWhileParsing()
     {
@@ -263,15 +279,46 @@ public class __ParserBlockTests__
     }
 
     [Test]
-    public void ParserBlock_TestLoopParsing2()
+    public void ParserBlock_TestForParsing()
     {
-        new Parser(new Lexer.Lexer("loop { }").Lex())
-            .ParseExpression().Should().BeEquivalentTo(
-                new RsLoop(
+        new Parser(new Lexer.Lexer("for x in 0..10 { x += 1; }").Lex())
+            .ParseFor().Should().BeEquivalentTo(
+                new RsFor(
+                    new RsName("x"),
+                    new RsRange(
+                        new RsLiteralInt("0"),
+                        new RsLiteralInt("10")
+                    ),
                     new RsBlock(
-                        Array.Empty<RsStatement>(),
+                        new RsStatement[] {new RsAssign(new RsName("x"), new RsAdd(new RsName("x"), new RsLiteralInt("1")))},
                         null
                     )
+                )
+            );
+    }
+
+    [Test]
+    public void ParserBlock_TestMatchParsing()
+    {
+        new Parser(new Lexer.Lexer("match x { 0 => 0, 1 => 1, _ => 2 }").Lex())
+            .ParseExpression().Should().BeEquivalentTo(
+                new RsMatch(
+                    new RsName("x"),
+                    new[]
+                    {
+                        new RsMatchArm(
+                            new RsLiteralInt("0"),
+                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("0")))
+                        ),
+                        new RsMatchArm(
+                            new RsLiteralInt("1"),
+                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("1")))
+                        ),
+                        new RsMatchArm(
+                            new RsUnderscore(),
+                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("2")))
+                        )
+                    }
                 )
             );
     }

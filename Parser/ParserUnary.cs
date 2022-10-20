@@ -104,7 +104,7 @@ public partial class Parser
             Literal => ParseLiteral(),
             Keyword { Value: KeywordType.True } => ParseLiteral(),
             Keyword { Value: KeywordType.False } => ParseLiteral(),
-            Identifier => ParseName(),
+            Identifier or Keyword => ParseName(),
             _ => throw new UnexpectedTokenException(token)
         };
 

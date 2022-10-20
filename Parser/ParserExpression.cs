@@ -252,7 +252,8 @@ public partial class Parser
             PunctuationType.CloseParen or
             PunctuationType.CloseBracket or
             PunctuationType.CloseBrace or 
-            PunctuationType.OpenBrace
+            PunctuationType.OpenBrace or 
+            PunctuationType.FatArrow
         };
 }
 
