@@ -168,13 +168,15 @@ public record RsEnum(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, 
 
 public record RsParameter(RsName Name, RsExpression Type) : RsNode;
 
+public record RsSelfParameter(RsExpression Self) : RsParameter(new RsSelf(), new RsSelfType());
+
 public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics,
-    RsParameter[] Parameters, RsExpression ReturnType, RsBlock Body
+    RsParameter[] Parameters, RsExpression ReturnType, RsBlock? Body
 ) : RsNode;
 
-public record RsTrait(RsName Name, RsFunction[] Functions) : RsNode;
+public record RsTrait(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsFunction[] Functions) : RsNode;
 
-public record RsImpl(RsExpression Type, RsTrait Trait, RsFunction[] Functions) : RsNode;
+public record RsImpl(RsExpression Type, RsExpression? Trait, RsFunction[] Functions) : RsNode;
 
 public record RsModule(RsName? Name, RsNode[] Nodes) : RsNode;
 

@@ -169,8 +169,7 @@ public partial class Parser
                                Value: PunctuationType.Semi or
                                PunctuationType.CloseParen or
                                PunctuationType.CloseBracket or
-                               PunctuationType.CloseBrace or
-                               PunctuationType.Comma
+                               PunctuationType.CloseBrace
                            })
                     {
                         fork.Next();
