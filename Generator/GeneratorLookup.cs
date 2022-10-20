@@ -64,6 +64,10 @@ public partial class Generator
                 GenerateExpressionStatement(expression);
                 break;
             
+            case RsExpression expression:
+                GenerateExpression(expression);
+                break;
+
             case RsLet let:
                 GenerateLet(let);
                 break;
