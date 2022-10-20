@@ -88,7 +88,7 @@ public record RsUnaryMinus(RsExpression Arg) : RsUnaryOp(Arg);
 
 public record RsDeref(RsExpression Arg) : RsUnaryOp(Arg);
 
-public record RsRef(bool Mutable, RsExpression Arg) : RsUnaryOp(Arg);
+public record RsRef(RsLabel? Lifetime, bool Mutable, RsExpression Arg) : RsUnaryOp(Arg);
 
 public record RsAdd(RsExpression Left, RsExpression Right) : RsBinaryOp(Left, Right);
 
@@ -156,7 +156,7 @@ public record RsAssignShr(RsExpression Left, RsExpression Right) : RsBinaryOp(Le
 
 public record RsGeneric(RsName Name, RsExpression[] Bounds) : RsNode;
 
-public record RsLifetime(RsLabel Name, RsLabel[] Bounds) : RsNode;
+public record RsLifetime(RsLabel Name) : RsNode;
 
 public record RsStructField(RsName Name, RsExpression Type) : RsNode;
 
@@ -164,19 +164,19 @@ public record RsStruct(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics
     RsStructField[] Fields
 ) : RsExpression;
 
-public record RsEnum(RsName Name, RsStruct[] Variants) : RsNode;
+public record RsEnum(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsStruct[] Variants) : RsNode;
 
 public record RsParameter(RsName Name, RsExpression Type) : RsNode;
 
 public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics,
-    RsParameter[] Parameters, RsExpression ReturnType, RsExpression? Body
+    RsParameter[] Parameters, RsExpression ReturnType, RsBlock Body
 ) : RsNode;
 
 public record RsTrait(RsName Name, RsFunction[] Functions) : RsNode;
 
 public record RsImpl(RsExpression Type, RsTrait Trait, RsFunction[] Functions) : RsNode;
 
-public record RsModule(RsPath Path, RsNode[] Nodes) : RsNode;
+public record RsModule(RsName? Name, RsNode[] Nodes) : RsNode;
 
 public record RsUse(RsPath Path) : RsNode;
 

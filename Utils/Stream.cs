@@ -152,12 +152,4 @@ internal class __StreamTests__
         Assert.AreEqual(5, stream.Next());
         Assert.IsFalse(stream.HasNext());
     }
-
-    [Test]
-    public void Stream_TestTakeWhile_ThrowsWhenStops()
-    {
-        var stream = new Stream<int>(new[] { 1, 2, 3, 4, 5 });
-        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-        Assert.Throws<EndOfStreamException>(() => stream.TakeWhile(x => x < 10).ToArray());
-    }
 }

@@ -32,7 +32,7 @@ public partial class Parser
         };
     }
 
-    public (RsLifetime[], RsGeneric[]) ParseLifetimesAndGenericsNoConstraints()
+    public (RsLifetime[], RsGeneric[]) ParseLifetimesAndGenerics()
     {
         if (_stream.Peek() is not Punctuation { Value: PunctuationType.Lt })
             return (Array.Empty<RsLifetime>(), Array.Empty<RsGeneric>());
@@ -51,14 +51,14 @@ public partial class Parser
                     generics.Add(new RsGeneric(ParseName(), Array.Empty<RsExpression>()));
                     break;
                 case Literal { Type: LiteralType.Label } label:
-                    lifetimes.Add(new RsLifetime(new RsLabel(label.Value), Array.Empty<RsLabel>()));
+                    _stream.Next();
+                    lifetimes.Add(new RsLifetime(new RsLabel(label.Value)));
                     break;
                 default:
                     throw new UnexpectedTokenException(token);
             }
 
-            if (token is Punctuation { Value: PunctuationType.Comma })
-                _stream.Skip();
+            _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
 
         return (lifetimes.ToArray(), generics.ToArray());
@@ -181,7 +181,7 @@ public partial class Parser
 
                     if (seenClose)
                     {
-                        var (lifetimes, generics) = ParseLifetimesAndGenericsNoConstraints();
+                        var (lifetimes, generics) = ParseLifetimesAndGenerics();
                         expr = new RsWithGenerics(expr, lifetimes, generics);
                     }
                     else
@@ -238,9 +238,12 @@ public partial class Parser
 
             case Punctuation { Value: PunctuationType.And }:
                 _stream.Next();
+                var lifetime = _stream.Peek() is Literal {Type: LiteralType.Label}
+                    ? new RsLabel(((Literal)_stream.Next()!).Value)
+                    : null;
                 return _stream.IfMatchConsume(new Keyword(KeywordType.Mut))
-                    ? new RsRef(true, ParsePrimaryExpression())
-                    : new RsRef(false, ParsePrimaryExpression());
+                    ? new RsRef(lifetime, true, ParsePrimaryExpression())
+                    : new RsRef(lifetime, false, ParsePrimaryExpression());
 
             case Punctuation { Value: PunctuationType.Star }:
                 _stream.Next();

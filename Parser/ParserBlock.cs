@@ -97,21 +97,21 @@ public partial class Parser
     public RsIf ParseIf()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.If));
-        
+
         var condition = ParseExpression();
         var thenClause = ParseBlock();
-        
+
 
         if (!_stream.IfMatchConsume(new Keyword(KeywordType.Else)))
             return new RsIf(condition, thenClause, null);
-        
+
         RsExpression? elseClause;
-        
+
         if (_stream.Peek() == new Keyword(KeywordType.If))
             elseClause = ParseIf();
         else
             elseClause = ParseBlock();
-        
+
         return new RsIf(condition, thenClause, elseClause);
     }
 
@@ -124,36 +124,36 @@ public partial class Parser
     public RsWhile ParseWhile()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.While));
-        
+
         var condition = ParseExpression();
         var body = ParseBlock();
-        
+
         return new RsWhile(condition, body);
     }
 
     public RsFor ParseFor()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.For));
-        
+
         var name = ParseName();
-        
+
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.In));
-        
+
         var iterable = ParseExpression();
         var body = ParseBlock();
-        
+
         return new RsFor(name, iterable, body);
     }
 
     public RsMatch ParseMatch()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.Match));
-        
+
         var expression = ParseExpression();
         Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.OpenBrace));
-        
+
         var arms = new List<RsMatchArm>();
-        
+
         while (_stream.Peek() != new Punctuation(PunctuationType.CloseBrace))
         {
             var pattern = ParseExpression();
@@ -162,21 +162,18 @@ public partial class Parser
                 arms.Add(new RsMatchArm(pattern, ParseBlock()));
             else
                 arms.Add(new RsMatchArm(
-                    pattern, 
+                    pattern,
                     new RsBlock(new RsStatement[] { new RsReturn(ParseExpression()) }, null)
-                    ));
+                ));
 
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
-        
+
         Debug.Assert(_stream.Next() == new Punctuation(PunctuationType.CloseBrace));
-        
+
         return new RsMatch(expression, arms.ToArray());
     }
-    
-    
 }
-
 
 public class __ParserBlockTests__
 {
@@ -185,23 +182,24 @@ public class __ParserBlockTests__
     {
         new Parser(new Lexer.Lexer("let mut foo: &Bar<Bar> = 1 + 1;").Lex())
             .ParseLet().Should().BeEquivalentTo(
-                    new RsLet(
-                        new RsName("foo"),
-                        true,
-                        new RsRef(
-                            false, 
-                            new RsWithGenerics(
-                                new RsName("Bar"),
-                                Array.Empty<RsLifetime>(),
-                                new[] {new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>()) }
-                            )
-                        ),
-                        new RsAdd(
-                            new RsLiteralInt("1"),
-                            new RsLiteralInt("1")
+                new RsLet(
+                    new RsName("foo"),
+                    true,
+                    new RsRef(
+                        null,
+                        false,
+                        new RsWithGenerics(
+                            new RsName("Bar"),
+                            Array.Empty<RsLifetime>(),
+                            new[] { new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>()) }
                         )
+                    ),
+                    new RsAdd(
+                        new RsLiteralInt("1"),
+                        new RsLiteralInt("1")
                     )
-                );
+                )
+            );
     }
 
     [Test]
@@ -214,7 +212,8 @@ public class __ParserBlockTests__
                     new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("0"))),
                     new RsIf(
                         new RsEq(new RsName("x"), new RsLiteralInt("1")),
-                        new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("1"))),
+                        new RsBlock(Array.Empty<RsStatement>(),
+                            new RsReturn(new RsLiteralInt("1"))),
                         new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("2")))
                     )
                 ));
@@ -241,12 +240,12 @@ public class __ParserBlockTests__
                     new RsName("x"),
                     new RsLoop(
                         new RsBlock(
-                            new RsStatement[] {new RsBreak(new RsLiteralInt("0"))},
+                            new RsStatement[] { new RsBreak(new RsLiteralInt("0")) },
                             null
                         )
                     )
                 )
-                );
+            );
     }
 
     [Test]
@@ -271,7 +270,11 @@ public class __ParserBlockTests__
                 new RsWhile(
                     new RsLt(new RsName("x"), new RsLiteralInt("10")),
                     new RsBlock(
-                        new RsStatement[] {new RsAssign(new RsName("x"), new RsAdd(new RsName("x"), new RsLiteralInt("1")))},
+                        new RsStatement[]
+                        {
+                            new RsAssign(new RsName("x"),
+                                new RsAdd(new RsName("x"), new RsLiteralInt("1")))
+                        },
                         null
                     )
                 )
@@ -290,7 +293,11 @@ public class __ParserBlockTests__
                         new RsLiteralInt("10")
                     ),
                     new RsBlock(
-                        new RsStatement[] {new RsAssign(new RsName("x"), new RsAdd(new RsName("x"), new RsLiteralInt("1")))},
+                        new RsStatement[]
+                        {
+                            new RsAssign(new RsName("x"),
+                                new RsAdd(new RsName("x"), new RsLiteralInt("1")))
+                        },
                         null
                     )
                 )
@@ -308,15 +315,18 @@ public class __ParserBlockTests__
                     {
                         new RsMatchArm(
                             new RsLiteralInt("0"),
-                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("0")))
+                            new RsBlock(Array.Empty<RsStatement>(),
+                                new RsReturn(new RsLiteralInt("0")))
                         ),
                         new RsMatchArm(
                             new RsLiteralInt("1"),
-                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("1")))
+                            new RsBlock(Array.Empty<RsStatement>(),
+                                new RsReturn(new RsLiteralInt("1")))
                         ),
                         new RsMatchArm(
                             new RsUnderscore(),
-                            new RsBlock(Array.Empty<RsStatement>(), new RsReturn(new RsLiteralInt("2")))
+                            new RsBlock(Array.Empty<RsStatement>(),
+                                new RsReturn(new RsLiteralInt("2")))
                         )
                     }
                 )
@@ -335,11 +345,16 @@ public class __ParserBlockTests__
                             new RsName("foo"),
                             true,
                             new RsRef(
-                                false, 
+                                null,
+                                false,
                                 new RsWithGenerics(
                                     new RsName("Bar"),
                                     Array.Empty<RsLifetime>(),
-                                    new[] {new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>()) }
+                                    new[]
+                                    {
+                                        new RsGeneric(new RsName("Bar"),
+                                            Array.Empty<RsExpression>())
+                                    }
                                 )
                             ),
                             new RsAdd(
