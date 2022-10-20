@@ -213,7 +213,7 @@ public class __TestTopLevelParser__
             .Should().BeEquivalentTo(
                 new RsModule(null, new RsNode[] {
                     new RsModule(new RsName("a"), new RsNode[] {
-                        new RsModule(new RsName("b"), new RsNode[] { })
+                        new RsModule(new RsName("b"), Array.Empty<RsNode>())
                     })
                 }));
     }

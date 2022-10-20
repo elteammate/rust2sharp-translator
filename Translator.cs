@@ -6,7 +6,8 @@ public static class Translator
     {
         var tokens = new Lexer.Lexer(source).Lex();
         var ast = new Parser.Parser(tokens).ParseTopLevel();
+        var code = new Generator.Generator(ast).Generate();
 
-        return ast.ToString();
+        return code;
     }
 }
