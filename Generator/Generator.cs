@@ -56,6 +56,8 @@ public partial class Generator
         public WithBlock(Generator generator)
         {
             _generator = generator;
+            if (!_generator._builderEndedLine)
+                _generator.AddLine();
             _generator.AddLine("{");
             _generator.Push();
         }
@@ -77,8 +79,19 @@ public partial class Generator
     
     private void Add(string str, params RsNode[] items)
     {
+        switch (str)
+        {
+            case "":
+                return;
+            case "\n":
+                _builder.AppendLine();
+                _builderEndedLine = true;
+                return;
+        }
+
         if (_builderEndedLine)
             _builder.Append(new string(' ', _indentLevel * 4));
+        _builderEndedLine = false;
 
         var itemStream = new Stream<RsNode>(items);
         
@@ -88,9 +101,42 @@ public partial class Generator
                 _builder.Append(c);
             else
                 Generate(itemStream.Next().Unwrap());
-
-            _builderEndedLine = c == '\n';
         }
+        
+        _builderEndedLine = str.Length > 0 && str[^1] == '\n';
+    }
+
+    private void AddJoined(
+        string sep, 
+        RsNode[] items, 
+        string prefix = "", 
+        string suffix = "",
+        bool addPrefixAndSuffixIfEmpty = true,
+        bool pushScope = false
+    )
+    {
+        if (items.Length == 0)
+        {
+            if (addPrefixAndSuffixIfEmpty)
+            {
+                Add(prefix);
+                Add(suffix);
+            }
+            return;
+        }
+
+        if (pushScope) Push();
+        Add(prefix);
+
+        for (var i = 0; i < items.Length - 1; i++)
+        {
+            Generate(items[i]);
+            Add(sep);
+        }
+
+        Generate(items[^1]);
+        Add(suffix);
+        if (pushScope) Pop();
     }
     
     public string Generate()
@@ -150,8 +196,29 @@ public partial class Generator
         return builder.ToString();
     }
 
+    private string? TryGetBuiltin(string name)
+    {
+        return name switch
+        {
+            "i8" => "sbyte",
+            "i16" => "byte",
+            "i32" => "int",
+            "i64" => "long",
+            "isize" => "nint",
+            "u8" => "byte",
+            "u16" => "ushort",
+            "u32" => "uint",
+            "u64" => "ulong",
+            "usize" => "nunt",
+            "f32" => "float",
+            "f64" => "double",
+            _ => null
+        };
+    }
+
     private void GenerateName(RsName name)
     {
-        Add(ToCamelCase(FindName(name.Name)));
+        var escapedName = FindName(name.Name);
+        Add(TryGetBuiltin(escapedName) ?? ToCamelCase(escapedName));
     }
 }

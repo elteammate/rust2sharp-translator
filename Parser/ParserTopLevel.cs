@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
 using FluentAssertions;
 using NUnit.Framework;
 using Rust2SharpTranslator.Lexer;
