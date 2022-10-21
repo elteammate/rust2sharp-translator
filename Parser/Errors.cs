@@ -8,12 +8,6 @@ public abstract class ParserException : Exception
     { }
 }
 
-public class ExpressionException : ParserException
-{
-    public ExpressionException() : base("Expected Expression")
-    { }
-}
-
 public class UnexpectedEndOfStreamException : ParserException
 {
     public UnexpectedEndOfStreamException() : base("Unexpected end of stream")

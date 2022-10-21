@@ -212,8 +212,22 @@ public partial class Generator
 
     private void GenerateName(RsName name)
     {
-        var escapedName = FindName(name.Name);
-        Add(TryGetBuiltin(escapedName) ?? ToCamelCase(escapedName));
+        switch (name)
+        {
+            case RsSelf:
+                Add("this");
+                break;
+            case RsSuper:
+                Add("base");
+                break;
+            case RsUnderscore:
+                Add("_");
+                break;
+            default:
+                var escapedName = FindName(name.Name);
+                Add(TryGetBuiltin(escapedName) ?? ToCamelCase(escapedName));
+                break;
+        }
     }
 
     private RsName GetTempVar()
