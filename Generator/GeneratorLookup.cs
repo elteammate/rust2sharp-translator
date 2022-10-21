@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
@@ -27,7 +26,7 @@ public partial class Generator
             case RsDocumented documented:
                 GenerateDocumented(documented);
                 break;
-            
+
             case RsAttributed attributed:
                 GenerateAttributed(attributed);
                 break;
@@ -39,15 +38,15 @@ public partial class Generator
             case RsFunction function:
                 GenerateFunction(function);
                 break;
-            
+
             case RsTypeDecl typeDecl:
                 GenerateTypeDecl(typeDecl);
                 break;
-           
+
             case RsStatic staticDecl:
                 GenerateStatic(staticDecl);
                 break;
-            
+
             case RsConst constDecl:
                 GenerateConst(constDecl);
                 break;

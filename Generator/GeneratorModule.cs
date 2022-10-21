@@ -1,4 +1,3 @@
-using NUnit.Framework.Internal;
 using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
@@ -39,12 +38,12 @@ public partial class Generator
     {
         if (_context == TranslationContext.Module)
             Add("public ");
-        
+
         if (function.Body == null) Add("abstract ");
 
-            using (Context(TranslationContext.Expression))
+        using (Context(TranslationContext.Expression))
         {
-            if (function.Parameters.FirstOrDefault() is not RsSelfParameter) 
+            if (function.Parameters.FirstOrDefault() is not RsSelfParameter)
                 Add("static ");
             Add("% %", function.ReturnType, function.Name);
         }
@@ -146,13 +145,13 @@ public partial class Generator
             AddLine(" = %;", typeDecl.Definition);
         }
     }
-    
+
     private void GenerateStatic(RsStatic @static)
     {
         using (Context(TranslationContext.Expression))
             AddLine("public static % % = %;", @static.Type, @static.Name, @static.Value);
     }
-    
+
     private void GenerateConst(RsConst @const)
     {
         using (Context(TranslationContext.Expression))
@@ -164,7 +163,7 @@ public partial class Generator
         foreach (var attribute in attributed.Attributes.Elements)
             using (Context(TranslationContext.Expression))
                 AddLine("[%]", attribute);
-        
+
         Generate(attributed.Node);
     }
 }

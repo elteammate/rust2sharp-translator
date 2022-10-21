@@ -13,7 +13,7 @@ public partial class Generator
         using (Context(TranslationContext.Expression))
             AddLine("%;", expression);
     }
-    
+
     private void GenerateBlock(RsBlock block)
     {
         var outerContext = _context;

@@ -46,10 +46,10 @@ public partial class Parser
                 _stream.Skip().And(() => new RsDocumented(
                     new RsBlockDocComment(comment.Value),
                     ParseTopLevelObject())),
-            
-            Punctuation { Value: PunctuationType.Pound } => 
+
+            Punctuation { Value: PunctuationType.Pound } =>
                 _stream.Skip().And(() => new RsAttributed(
-                    (ParseExpression() as RsLiteralArray).Unwrap(), 
+                    (ParseExpression() as RsLiteralArray).Unwrap(),
                     ParseTopLevelObject())
                 ),
 
@@ -251,7 +251,7 @@ public partial class Parser
         Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Semi });
         return new RsStatic(name, type, value);
     }
-    
+
     private RsConst ParseConst()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.Const));

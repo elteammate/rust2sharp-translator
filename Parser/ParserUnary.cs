@@ -60,18 +60,19 @@ public partial class Parser
                 default:
                     throw new UnexpectedTokenException(token);
             }
-            
+
             var bounds = new List<RsExpression>();
             if (_stream.Peek() is Punctuation { Value: PunctuationType.Colon })
             {
                 _stream.Next();
-                while (_stream.Peek() is not Punctuation { Value: PunctuationType.Comma } and not Punctuation { Value: PunctuationType.Gt })
+                while (_stream.Peek() is not Punctuation { Value: PunctuationType.Comma }
+                       and not Punctuation { Value: PunctuationType.Gt })
                 {
                     bounds.Add(ParseExpression(BinaryPrecedence.Add + 1));
                     _stream.IfMatchConsume(new Punctuation(PunctuationType.Plus));
                 }
             }
-            
+
             generics[^1] = new RsGeneric(generics[^1].Name, bounds.ToArray());
 
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
