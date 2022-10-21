@@ -44,6 +44,7 @@ public partial class Generator
             case RsModule module:
                 GenerateModule(module);
                 break;
+            
             case RsFunction function:
                 GenerateFunction(function);
                 break;
@@ -56,20 +57,28 @@ public partial class Generator
                 GenerateParameter(parameter);
                 break;
             
-            case RsBlock block when _context == TranslationContext.Module:
+            case RsBlock block when _context != TranslationContext.Expression:
                 GenerateBlock(block);
                 break;
 
-            case RsExpression expression when _context == TranslationContext.Function:
+            case RsLet let:
+                GenerateLet(let);
+                break;
+            
+            case RsIf @if:
+                GenerateIf(@if);
+                break;
+            
+            case RsReturn @return:
+                GenerateReturn(@return);
+                break;
+
+            case RsExpression expression when _context != TranslationContext.Expression:
                 GenerateExpressionStatement(expression);
                 break;
             
             case RsExpression expression:
                 GenerateExpression(expression);
-                break;
-
-            case RsLet let:
-                GenerateLet(let);
                 break;
 
             default:

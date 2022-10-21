@@ -71,9 +71,31 @@ public partial class Generator
             _generator.AddLine("}");
         }
     }
+
+    private class WithLambdaBlock : IDisposable
+    {
+        private readonly Generator _generator;
+        private readonly WithContext _withContext;
+
+        public WithLambdaBlock(Generator generator)
+        {
+            _generator = generator;
+            _generator.Add("(((%) => ", _generator.GetTempVar());
+            _generator.Push();
+            _withContext = new WithContext(generator, TranslationContext.Function);
+        }
+
+        public void Dispose()
+        {
+            _withContext.Dispose();
+            _generator.Pop();
+            _generator.Add(")(0))");
+        }
+    }
     
     private WithIndent Indent() => new(this);
     private WithBlock Block() => new(this);
+    private WithLambdaBlock LambdaBlock() => new(this);
 
     private void AddLine(string line = "", params RsNode[] items)
     {
@@ -183,7 +205,7 @@ public partial class Generator
 
     private string FindName(string name) => TryFindName(name) ?? name;
 
-    private int _nameCounter = 0;
+    private int _nameCounter;
     
     private void RegisterName(RsName name)
     {
@@ -193,7 +215,7 @@ public partial class Generator
             _scopes.Peek()[name.Name] = name.Name;
             return;
         }
-        
+
         var suffix = 1;
         while (ContainsName(name.Name + suffix))
             suffix++;
@@ -250,5 +272,14 @@ public partial class Generator
     {
         var escapedName = FindName(name.Name);
         Add(TryGetBuiltin(escapedName) ?? ToCamelCase(escapedName));
+    }
+
+    private int _tempVarCounter;
+
+    private RsName GetTempVar()
+    {
+        var variable = new RsName($"Temp{_tempVarCounter++}");
+        RegisterName(variable);
+        return variable;
     }
 }

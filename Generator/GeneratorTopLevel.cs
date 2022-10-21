@@ -15,7 +15,7 @@ public partial class Generator
     {
         if (function.Body == null) Add("abstract ");
         
-        Add("% %", function.ReturnType, function.Name);
+        using(Context(TranslationContext.Expression)) Add("% %", function.ReturnType, function.Name);
         GenerateGenerics(function.Generics);
         GenerateParameters(function.Parameters);
 
@@ -38,7 +38,9 @@ public partial class Generator
         using var _2 = Context(TranslationContext.Function);
         
         foreach (var item in block.Statements) Generate(item);
-        if (block.Expression != null) AddLine("return %;", block.Expression);
+        if (block.Expression != null)
+            using (Context(TranslationContext.Expression))
+                AddLine("return %;", block.Expression);
     }
 
     private void GenerateGeneric(RsGeneric generic) 

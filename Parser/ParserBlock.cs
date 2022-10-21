@@ -27,7 +27,7 @@ public partial class Parser
             else if (_stream.Peek() == new Punctuation(PunctuationType.CloseBrace))
                 expression = (statement as RsExpression).Unwrap();
             else
-                throw new UnexpectedTokenException(_stream.Peek());
+                statements.Add(statement);
         }
 
         return new RsBlock(statements.ToArray(), expression);
