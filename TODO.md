@@ -4,8 +4,8 @@
 - (?) Замыкания
 - use
 - ~~type~~
-- where, trait bounds
+- ~~where, trait bounds~~
 - ~~pub~~
 - ~~static, const~~
 - ~~ДОКУМЕНТАЦИЯ!!!~~
-- атрибуты
+  - атрибуты

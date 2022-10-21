@@ -46,6 +46,12 @@ public partial class Parser
                 _stream.Skip().And(() => new RsDocumented(
                     new RsBlockDocComment(comment.Value),
                     ParseTopLevelObject())),
+            
+            Punctuation { Value: PunctuationType.Pound } => 
+                _stream.Skip().And(() => new RsAttributed(
+                    (ParseExpression() as RsLiteralArray).Unwrap(), 
+                    ParseTopLevelObject())
+                ),
 
             Keyword { Value: KeywordType.Pub } => _stream.Skip()
                 .And(() => new RsPub(ParseTopLevelObject())),

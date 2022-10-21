@@ -48,6 +48,8 @@ public partial class Generator
         GenerateGenerics(function.Generics);
         GenerateParameters(function.Parameters);
 
+        GenerateGenericBounds(function.Generics);
+
         if (function.Body == null)
             AddLine(";");
         else
@@ -82,6 +84,7 @@ public partial class Generator
     {
         Add("public partial class %", @struct.Name);
         GenerateGenerics(@struct.Generics);
+        GenerateGenericBounds(@struct.Generics);
 
         using (Block()) AddJoined("", @struct.Fields.ToArray<RsNode>());
     }
@@ -96,6 +99,7 @@ public partial class Generator
         var name = @enum.Name;
         Add("public abstract partial class %", name);
         GenerateGenerics(@enum.Generics);
+        GenerateGenericBounds(@enum.Generics);
 
         using (Block())
             foreach (var option in @enum.Variants)
@@ -113,6 +117,7 @@ public partial class Generator
     {
         Add("public interface %", trait.Name);
         GenerateGenerics(trait.Generics);
+        GenerateGenericBounds(trait.Generics);
 
         using (Block()) AddJoined("", trait.Functions.ToArray<RsNode>());
     }
@@ -140,11 +145,22 @@ public partial class Generator
     
     private void GenerateStatic(RsStatic @static)
     {
-        AddLine("public static % % = %;", @static.Type, @static.Name, @static.Value);
+        using (Context(TranslationContext.Expression))
+            AddLine("public static % % = %;", @static.Type, @static.Name, @static.Value);
     }
     
     private void GenerateConst(RsConst @const)
     {
-        AddLine("public const % % = %;", @const.Type, @const.Name, @const.Value);
+        using (Context(TranslationContext.Expression))
+            AddLine("public const % % = %;", @const.Type, @const.Name, @const.Value);
+    }
+
+    private void GenerateAttributed(RsAttributed attributed)
+    {
+        foreach (var attribute in attributed.Attributes.Elements)
+            using (Context(TranslationContext.Expression))
+                AddLine("[%]", attribute);
+        
+        Generate(attributed.Node);
     }
 }

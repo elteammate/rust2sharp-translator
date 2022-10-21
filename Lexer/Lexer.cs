@@ -173,6 +173,7 @@ public class Lexer
         while (_stream.HasNext())
         {
             var token = ReadNext();
+            if (token is Comment { Type: CommentType.Line or CommentType.Block }) continue;
             if (token != null)
                 tokens.Add(token);
         }

@@ -162,4 +162,19 @@ public partial class Generator
         else
             GenerateMatchImpl(match);
     }
+
+    private void GenerateGenericBounds(RsGeneric[] generics)
+    {
+        if (!generics.Any(g => g.Bounds.Length > 0)) return;
+        AddLine();
+
+        using (Indent())
+            foreach (var generic in generics)
+            {
+                if (generic.Bounds.Length == 0) continue;
+                Add("where % : ", generic.Name);
+                AddJoined(", ", generic.Bounds.ToArray<RsNode>());
+                AddLine();
+            }
+    }
 }

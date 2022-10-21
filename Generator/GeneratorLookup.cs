@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
@@ -25,6 +26,10 @@ public partial class Generator
 
             case RsDocumented documented:
                 GenerateDocumented(documented);
+                break;
+            
+            case RsAttributed attributed:
+                GenerateAttributed(attributed);
                 break;
 
             case RsPub pub:

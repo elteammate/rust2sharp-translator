@@ -207,3 +207,5 @@ public record RsBlockDocComment(string Content) : RsComment;
 public record RsDocumented(RsComment Comment, RsNode Node) : RsNode;
 
 public record RsPub(RsNode Node) : RsNode;
+
+public record RsAttributed(RsLiteralArray Attributes, RsNode Node) : RsNode;
