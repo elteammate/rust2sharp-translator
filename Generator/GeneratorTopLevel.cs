@@ -17,7 +17,8 @@ public partial class Generator
 
         using (Context(TranslationContext.Expression))
         {
-            Add("static % %", function.ReturnType, function.Name);
+            if (function.Parameters.FirstOrDefault() is not RsSelfParameter) Add("static ");
+            Add("% %", function.ReturnType, function.Name);
         }
 
         GenerateGenerics(function.Generics);
@@ -66,7 +67,9 @@ public partial class Generator
     }
 
     private void GenerateParameters(IEnumerable<RsParameter> parameters)
-        => AddJoined(", ", parameters.ToArray<RsNode>(), "(", ")");
+        => AddJoined(", ", parameters
+            .Where(p => p is not RsSelfParameter)
+            .ToArray<RsNode>(), "(", ")");
 
     private void GenerateStruct(RsStruct @struct)
     {

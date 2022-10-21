@@ -63,8 +63,9 @@ public partial class Parser
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.CloseParen)))
         {
             var paramName = ParseExpression();
-            if (_stream.Next() is Punctuation { Value: PunctuationType.Colon })
+            if (_stream.Peek() is Punctuation { Value: PunctuationType.Colon })
             {
+                _stream.Next();
                 Debug.Assert(paramName is RsName);
                 var type = ParseExpression();
                 parameters.Add(new RsParameter((paramName as RsName).Unwrap(), type));
