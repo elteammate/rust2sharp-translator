@@ -38,15 +38,19 @@ public partial class Generator
 
     private void GenerateBlock(RsBlock block)
     {
+        var outerContext = _context;
         using var _1 = Block();
         using var _2 = Context(TranslationContext.Function);
 
         foreach (var item in block.Statements) Generate(item);
-        if (block.Expression != null)
+        
+        if (block.Expression == null) return;
+        
+        if (outerContext == TranslationContext.Module)
             using (Context(TranslationContext.Expression))
-            {
                 AddLine("return %;", block.Expression);
-            }
+        else
+            Generate(block.Expression);
     }
 
     private void GenerateGeneric(RsGeneric generic)
@@ -56,7 +60,10 @@ public partial class Generator
         => AddJoined(", ", generics.ToArray<RsNode>(), "<", ">", false);
 
     private void GenerateParameter(RsParameter parameter)
-        => Add("% %", parameter.Type, parameter.Name);
+    {
+        RegisterName(parameter.Name);
+        Add("% %", parameter.Type, parameter.Name);
+    }
 
     private void GenerateParameters(IEnumerable<RsParameter> parameters)
         => AddJoined(", ", parameters.ToArray<RsNode>(), "(", ")");

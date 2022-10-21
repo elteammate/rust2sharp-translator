@@ -47,6 +47,26 @@ public partial class Generator
             case RsReturn @return:
                 GenerateReturn(@return);
                 break;
+            
+            case RsBreak @break:
+                GenerateBreak(@break);
+                break;
+            
+            case RsLoop loop:
+                GenerateLoop(loop);
+                break;
+            
+            case RsWhile @while:
+                GenerateWhile(@while);
+                break;
+            
+            case RsFor @for:
+                GenerateFor(@for);
+                break;
+            
+            case RsContinue:
+                GenerateContinue();
+                break;
 
             case RsExpression expression when _context != TranslationContext.Expression:
                 GenerateExpressionStatement(expression);

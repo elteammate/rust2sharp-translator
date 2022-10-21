@@ -25,13 +25,15 @@ public record RsPath(RsExpression? Prefix, RsName Name) : RsExpression;
 public record RsLet
     (RsName Name, bool? Mutable, RsExpression? Type, RsExpression? Value) : RsStatement;
 
+public abstract record RsAnyLoop : RsStatement;
+
 public record RsIf(RsExpression Condition, RsExpression Then, RsExpression? Else) : RsExpression;
 
-public record RsLoop(RsExpression Body) : RsExpression;
+public record RsLoop(RsExpression Body) : RsAnyLoop;
 
-public record RsWhile(RsExpression Condition, RsStatement Body) : RsExpression;
+public record RsWhile(RsExpression Condition, RsStatement Body) : RsAnyLoop;
 
-public record RsFor(RsName Binding, RsExpression Iterator, RsStatement Body) : RsExpression;
+public record RsFor(RsName Binding, RsExpression Iterator, RsStatement Body) : RsAnyLoop;
 
 public record RsBlock(RsStatement[] Statements, RsExpression? Expression) : RsExpression;
 

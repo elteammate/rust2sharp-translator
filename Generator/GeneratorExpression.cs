@@ -165,6 +165,11 @@ public partial class Generator
                 AddJoined(", ", call.Arguments.ToArray<RsNode>(), "(", ")");
                 break;
 
+            case RsWithGenerics generics:
+                Generate(generics.Value);
+                AddJoined(", ", generics.Generics.ToArray<RsNode>(), "<", ">");
+                break;
+            
             case RsIndex index:
                 Add("%[%]", index.Value, index.Index);
                 break;

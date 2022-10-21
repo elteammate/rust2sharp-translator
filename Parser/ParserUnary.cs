@@ -257,8 +257,6 @@ public partial class Parser
 
             case Keyword { Value: KeywordType.If }:
                 return ParseIf();
-            case Keyword { Value: KeywordType.Loop }:
-                return ParseLoop();
             case Keyword { Value: KeywordType.Match }:
                 return ParseMatch();
             default:

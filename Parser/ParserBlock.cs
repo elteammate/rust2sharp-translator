@@ -25,7 +25,10 @@ public partial class Parser
                 statements.Add(statement);
             }
             else if (_stream.Peek() == new Punctuation(PunctuationType.CloseBrace))
-                expression = (statement as RsExpression).Unwrap();
+                if (statement is RsExpression expr)
+                    expression = expr;
+                else
+                    statements.Add(statement);
             else
                 statements.Add(statement);
         }
@@ -100,8 +103,7 @@ public partial class Parser
 
         var condition = ParseExpression();
         var thenClause = ParseBlock();
-
-
+        
         if (!_stream.IfMatchConsume(new Keyword(KeywordType.Else)))
             return new RsIf(condition, thenClause, null);
 
@@ -234,15 +236,12 @@ public class __ParserBlockTests__
     [Test]
     public void ParserBlock_TestLoopParsing()
     {
-        new Parser(new Lexer.Lexer("x = loop { break 0; }").Lex())
+        new Parser(new Lexer.Lexer("loop { break 0; }").Lex())
             .ParseExpression().Should().BeEquivalentTo(
-                new RsAssign(
-                    new RsName("x"),
-                    new RsLoop(
-                        new RsBlock(
-                            new RsStatement[] { new RsBreak(new RsLiteralInt("0")) },
-                            null
-                        )
+                new RsLoop(
+                    new RsBlock(
+                        new RsStatement[] { new RsBreak(new RsLiteralInt("0")) },
+                        null
                     )
                 )
             );

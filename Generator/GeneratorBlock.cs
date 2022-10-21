@@ -7,23 +7,24 @@ public partial class Generator
 {
     private void GenerateExpressionStatement(RsExpression expression)
     {
-        using var _ = Context(TranslationContext.Expression);
-        AddLine("%;", expression);
+        using (Context(TranslationContext.Expression))
+            AddLine("%;", expression);
     }
 
     private void GenerateLet(RsLet let)
     {
-        using var _ = Context(TranslationContext.Expression);
+        using (Context(TranslationContext.Expression))
+        {
+            if (let.Type == null)
+                AddLine("var | = %;", let.Value.Unwrap());
+            else if (let.Value == null)
+                AddLine("% |;", let.Type);
+            else
+                AddLine("% | = %;", let.Type, let.Value);
 
-        if (let.Type == null)
-            AddLine("var | = %;", let.Value.Unwrap());
-        else if (let.Value == null)
-            AddLine("% |;", let.Type);
-        else
-            AddLine("% | = %;", let.Type, let.Value);
-
-        RegisterName(let.Name);
-        AddAtWaypoint("%", let.Name);
+            RegisterName(let.Name);
+            AddAtWaypoint("%", let.Name);
+        }
     }
 
     private static RsBlock ElevateReturn(RsBlock block)
@@ -34,25 +35,22 @@ public partial class Generator
         return new RsBlock(block.Statements.Append(returnStatement).ToArray(), null);
     }
 
-    private void GenerateIf(RsIf @if, bool elevateReturn)
+    private void GenerateIfImpl(RsIf @if)
     {
         using (Context(TranslationContext.Expression))
         {
             AddLine("if (%)", @if.Condition);
         }
 
-        using (Context(TranslationContext.Function))
-        {
-            Generate(elevateReturn ? ElevateReturn((@if.Then as RsBlock).Unwrap()) : @if.Then);
-        }
+        Generate(@if.Then);
 
         if (@if.Else == null) return;
 
         AddLine("else");
         if (@if.Else is RsIf @else)
-            GenerateIf(@else, elevateReturn);
+            GenerateIfImpl(@else);
         else
-            Generate(elevateReturn ? ElevateReturn((@if.Else as RsBlock).Unwrap()) : @if.Else);
+            Generate(@if.Else);
     }
 
     private void GenerateIf(RsIf @if)
@@ -61,17 +59,60 @@ public partial class Generator
             using (LambdaBlock())
             using (Block())
             {
-                GenerateIf(@if, true);
+                GenerateIfImpl(@if);
             }
         else
-            GenerateIf(@if, false);
+            GenerateIfImpl(@if);
     }
 
     private void GenerateReturn(RsReturn @return)
     {
-        using (Context(TranslationContext.Expression))
-        {
+        using (Context(TranslationContext.Expression)) 
             AddLine("return %;", @return.Value.Unwrap());
-        }
+    }
+
+    private void GenerateContinue()
+    {
+        using (Context(TranslationContext.Expression)) 
+            AddLine("continue;");
+    }
+
+    private void GenerateBreak(RsBreak @break)
+    {
+        using (Context(TranslationContext.Expression)) 
+            if (@break.Value == null)
+                AddLine("break;");
+            else
+                AddLine("break %;", @break.Value);
+    }
+
+    private void GenerateLoop(RsLoop loop)
+    {
+        using (Context(TranslationContext.Expression)) 
+            AddLine("while (true)");
+
+        using (Context(TranslationContext.Function))
+            Generate(loop.Body);
+    }
+
+    private void GenerateWhile(RsWhile @while)
+    {        
+        using (Context(TranslationContext.Expression)) 
+            AddLine("while (%)", @while.Condition);
+
+        using (Context(TranslationContext.Function))
+            Generate(@while.Body);
+    }
+
+    private void GenerateFor(RsFor @for)
+    {
+        using (Context(TranslationContext.Expression)) 
+            AddLine("foreach (var | in %)", @for.Iterator);
+
+        RegisterName(@for.Binding);
+        AddAtWaypoint("%", @for.Binding);
+        
+        using (Context(TranslationContext.Function))
+            Generate(@for.Body);
     }
 }

@@ -245,7 +245,7 @@ public partial class Parser
     }
 
     private static bool IsTerminator(Token? token) =>
-        token is null or Punctuation
+        token is null or Keyword {Value: not KeywordType.As} or Punctuation
         {
             Value: PunctuationType.Semi or
             PunctuationType.Comma or

@@ -139,10 +139,10 @@ public partial class Generator
 
     private string? TryFindName(string name)
     {
-        string? foundName = null;
-        foreach (var scope in _scopes.Where(scope => scope.ContainsKey(name)))
-            foundName = scope[name];
-        return foundName;
+        return _scopes
+            .Where(scope => scope.ContainsKey(name))
+            .Select(scope => scope[name])
+            .FirstOrDefault();
     }
 
     private bool ContainsName(string name) =>
@@ -152,21 +152,24 @@ public partial class Generator
 
     private void RegisterName(RsName name)
     {
+        void SaveName(string newName, string initial)
+        {
+            _scopes.Peek()[$"${_nameCounter++}${newName}"] = newName;
+            _scopes.Peek()[newName] = newName;
+            _scopes.Peek()[initial] = newName;
+        }
+        
         if (!ContainsName(name.Name))
         {
-            _scopes.Peek()[$"${_nameCounter++}${name.Name}"] = name.Name;
-            _scopes.Peek()[name.Name] = name.Name;
+            SaveName(name.Name, name.Name);
             return;
         }
 
         var suffix = 1;
         while (ContainsName(name.Name + suffix))
             suffix++;
-
-        var result = name.Name + suffix;
-
-        _scopes.Peek()[$"${_nameCounter++}${name.Name}"] = result;
-        _scopes.Peek()[name.Name] = result;
+        
+        SaveName(name.Name + suffix, name.Name);
     }
 
     private static string ToCamelCase(string name)
@@ -283,7 +286,7 @@ public partial class Generator
             _generator = generator;
             _generator.Add("(((%) => ", _generator.GetTempVar());
             _generator.Push();
-            _withContext = new WithContext(generator, TranslationContext.Function);
+            _withContext = new WithContext(generator, TranslationContext.Module);
         }
 
         public void Dispose()
