@@ -7,5 +7,5 @@
 - where, trait bounds
 - ~~pub~~
 - static, const
-- ДОКУМЕНТАЦИЯ!!!
+- ~~ДОКУМЕНТАЦИЯ!!!~~
 - атрибуты

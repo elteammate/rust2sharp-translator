@@ -127,4 +127,9 @@ public partial class Generator
 
         using (Block()) AddJoined("\n", impl.Functions.ToArray<RsNode>());
     }
+
+    private void GenerateTypeDecl(RsTypeDecl typeDecl)
+    {
+        AddLine("public using % = %;", typeDecl.Name, typeDecl.Definition);
+    }
 }

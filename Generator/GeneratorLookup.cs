@@ -34,6 +34,10 @@ public partial class Generator
             case RsFunction function:
                 GenerateFunction(function);
                 break;
+            
+            case RsTypeDecl typeDecl:
+                GenerateTypeDecl(typeDecl);
+                break;
 
             case RsGeneric generic:
                 GenerateGeneric(generic);

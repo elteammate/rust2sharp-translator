@@ -33,6 +33,7 @@ public partial class Parser
             Keyword { Value: KeywordType.Trait } => ParseTrait(),
             Keyword { Value: KeywordType.Impl } => ParseImpl(),
             Keyword { Value: KeywordType.Enum } => ParseEnum(),
+            Keyword { Value: KeywordType.Type } => ParseTypeDecl(),
 
             Comment { Type: CommentType.DocLine } comment =>
                 _stream.Skip().And(() => new RsDocumented(
@@ -217,6 +218,17 @@ public partial class Parser
         var type = forWhat ?? what;
         var trait = forWhat == null ? null : what;
         return new RsImpl(type, trait, functions.ToArray());
+    }
+
+    private RsTypeDecl ParseTypeDecl()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.Type));
+        var name = ParseName();
+        var lifetimesAndGenerics = ParseLifetimesAndGenerics();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Eq });
+        var type = ParseExpression();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Semi });
+        return new RsTypeDecl(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2, type);
     }
 }
 
