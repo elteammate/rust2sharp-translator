@@ -84,6 +84,11 @@ public partial class Generator
                 GenerateTrait(trait);
                 break;
             
+            
+            case RsImpl impl:
+                GenerateImpl(impl);
+                break;
+            
             case RsStructField field:
                 GenerateField(field);
                 break;

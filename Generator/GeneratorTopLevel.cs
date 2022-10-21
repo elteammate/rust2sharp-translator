@@ -115,4 +115,17 @@ public partial class Generator
             AddJoined("", trait.Functions.ToArray<RsNode>());
         }
     }
+
+    private void GenerateImpl(RsImpl impl)
+    {
+        using (Context(TranslationContext.Expression)) {
+            Add("public partial class %", impl.Type);
+            if (impl.Trait != null) Add(" : %", impl.Trait);
+        }
+
+        using (Block())
+        {
+            AddJoined("\n", impl.Functions.ToArray<RsNode>());
+        }
+    }
 }
