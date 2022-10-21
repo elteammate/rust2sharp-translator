@@ -1,3 +1,4 @@
+using NUnit.Framework.Internal;
 using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
@@ -36,12 +37,15 @@ public partial class Generator
 
     private void GenerateFunction(RsFunction function)
     {
-        Add("public ");
+        if (_context == TranslationContext.Module)
+            Add("public ");
+        
         if (function.Body == null) Add("abstract ");
 
-        using (Context(TranslationContext.Expression))
+            using (Context(TranslationContext.Expression))
         {
-            if (function.Parameters.FirstOrDefault() is not RsSelfParameter) Add("static ");
+            if (function.Parameters.FirstOrDefault() is not RsSelfParameter) 
+                Add("static ");
             Add("% %", function.ReturnType, function.Name);
         }
 

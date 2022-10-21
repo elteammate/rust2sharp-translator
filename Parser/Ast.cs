@@ -175,7 +175,7 @@ public record RsSelfParameter(RsExpression Self) : RsParameter(new RsSelf(), new
 
 public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics,
     RsParameter[] Parameters, RsExpression ReturnType, RsBlock? Body
-) : RsNode;
+) : RsStatement;
 
 public record RsTrait(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics,
     RsFunction[] Functions

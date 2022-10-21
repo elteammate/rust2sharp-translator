@@ -48,6 +48,9 @@ public partial class Parser
 
             case Keyword { Value: KeywordType.Let }:
                 return ParseLet();
+            
+            case Keyword { Value: KeywordType.Fn }:
+                return ParseFunction();
 
             case Keyword { Value: KeywordType.Return }:
                 _stream.Next();
