@@ -2,10 +2,12 @@ using System.Diagnostics;
 using FluentAssertions;
 using NUnit.Framework;
 using Rust2SharpTranslator.Lexer;
-using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Parser;
 
+/// <summary>
+///     Parses everything at block level (statements)
+/// </summary>
 public partial class Parser
 {
     public RsBlock ParseBlock()
@@ -103,7 +105,7 @@ public partial class Parser
 
         var condition = ParseExpression();
         var thenClause = ParseBlock();
-        
+
         if (!_stream.IfMatchConsume(new Keyword(KeywordType.Else)))
             return new RsIf(condition, thenClause, null);
 

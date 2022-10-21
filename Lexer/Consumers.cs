@@ -1,5 +1,8 @@
 namespace Rust2SharpTranslator.Lexer;
 
+/// <summary>
+///     Helping methods used in lexer
+/// </summary>
 public static class Consumers
 {
     public static bool IsSpace(char c) => c is ' ' or '\t' or '\r' or '\n';

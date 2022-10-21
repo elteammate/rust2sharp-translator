@@ -169,7 +169,7 @@ public partial class Generator
                 Generate(generics.Value);
                 AddJoined(", ", generics.Generics.ToArray<RsNode>(), "<", ">");
                 break;
-            
+
             case RsIndex index:
                 Add("%[%]", index.Value, index.Index);
                 break;
@@ -230,11 +230,12 @@ public partial class Generator
                 Add(" }");
                 break;
 
+            case RsLiteralBool @bool:
+                Add(@bool.Repr);
+                break;
+
             case RsBlock block:
-                using (LambdaBlock())
-                {
-                    Generate(block);
-                }
+                using (LambdaBlock()) Generate(block);
 
                 break;
 

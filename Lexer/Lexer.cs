@@ -5,6 +5,9 @@ using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Lexer;
 
+/// <summary>
+///     Tokenizer for Rust source code.
+/// </summary>
 public class Lexer
 {
     private readonly Stream<char> _stream;

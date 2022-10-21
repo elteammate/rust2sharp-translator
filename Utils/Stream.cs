@@ -88,6 +88,8 @@ public class Stream<T>
             Next();
         }
     }
+
+    public TR And<TR>(Func<TR> func) => func();
 }
 
 internal class __StreamTests__

@@ -5,6 +5,9 @@ using Rust2SharpTranslator.Lexer;
 
 namespace Rust2SharpTranslator.Parser;
 
+/// <summary>
+///     Parses unary AST, paths, dot expressions, and function calls, etc.
+/// </summary>
 public partial class Parser
 {
     public RsName ParseName()

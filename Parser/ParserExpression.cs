@@ -4,6 +4,9 @@ using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Parser;
 
+/// <summary>
+///     Parses expressions
+/// </summary>
 public partial class Parser
 {
     public enum Associativity
@@ -245,7 +248,7 @@ public partial class Parser
     }
 
     private static bool IsTerminator(Token? token) =>
-        token is null or Keyword {Value: not KeywordType.As} or Punctuation
+        token is null or Keyword { Value: not KeywordType.As } or Punctuation
         {
             Value: PunctuationType.Semi or
             PunctuationType.Comma or

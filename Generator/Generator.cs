@@ -4,20 +4,51 @@ using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Generator;
 
+/// <summary>
+///     A base class for code generation
+///     The main method is Generate, which looks up
+///     Generate...() method, used to generate the object
+/// </summary>
 public partial class Generator
 {
+    /// <summary>
+    ///     The generated code is placed here
+    /// </summary>
     private readonly StringBuilder _builder;
+
+    /// <summary>
+    ///     The root of AST to generate
+    /// </summary>
     private readonly RsNode _node;
-    private readonly Stack<int> _waypoints = new();
 
-    private bool _builderEndedLine = true;
-
-    private int _indentLevel;
-
-    private int _nameCounter;
-
+    /// <summary>
+    ///     The scopes of variables
+    /// </summary>
     private readonly Stack<Dictionary<string, string>> _scopes = new();
 
+    /// <summary>
+    ///     A stack of waypoints for builder
+    /// </summary>
+    private readonly Stack<int> _waypoints = new();
+
+    /// <summary>
+    ///     Whether the builder finished with \n
+    /// </summary>
+    private bool _builderEndedLine = true;
+
+    /// <summary>
+    ///     The current indentation level
+    /// </summary>
+    private int _indentLevel;
+
+    /// <summary>
+    ///     Used to assign unique names to variables
+    /// </summary>
+    private int _nameCounter;
+
+    /// <summary>
+    ///     Used to create temporary variables with unique names
+    /// </summary>
     private int _tempVarCounter;
 
     public Generator(RsNode node)
@@ -27,27 +58,51 @@ public partial class Generator
         _scopes.Push(new Dictionary<string, string>());
     }
 
+    /// <summary>
+    ///     Creates a new scope with bigger indent
+    /// </summary>
     private void Push()
     {
         _scopes.Push(new Dictionary<string, string>());
         _indentLevel++;
     }
 
+    /// <summary>
+    ///     Removes one level of indent and one scope
+    /// </summary>
     private void Pop()
     {
         _indentLevel--;
         _scopes.Pop();
     }
 
+    /// <summary>
+    ///     Context used to increase code indent
+    /// </summary>
     private WithIndent Indent() => new(this);
+
+    /// <summary>
+    ///     Context used to add braces to the code
+    /// </summary>
     private WithBlock Block() => new(this);
+
+    /// <summary>
+    ///     Context used to add braces to the code in expressions using lambdas
+    /// </summary>
     private WithLambdaBlock LambdaBlock() => new(this);
 
+    /// <summary>
+    ///     Add new line to the code
+    /// </summary>
     private void AddLine(string line = "", params RsNode[] items)
     {
         Add(line + "\n", items);
     }
 
+    /// <summary>
+    ///     Add to the code. The % character in string used to inline nodes
+    ///     into string, | used to create waypoings
+    /// </summary>
     private void Add(string str, params RsNode[] items)
     {
         switch (str)
@@ -83,6 +138,9 @@ public partial class Generator
         _builderEndedLine = str.Length > 0 && str[^1] == '\n';
     }
 
+    /// <summary>
+    ///     Add content to last added waypoing
+    /// </summary>
     private void AddAtWaypoint(string str, params RsNode[] items)
     {
         var waypoint = _waypoints.Pop();
@@ -137,6 +195,9 @@ public partial class Generator
         return _builder.ToString();
     }
 
+    /// <summary>
+    ///     Returns escaped and unique name if the variable is already defined
+    /// </summary>
     private string? TryFindName(string name)
     {
         return _scopes
@@ -145,11 +206,21 @@ public partial class Generator
             .FirstOrDefault();
     }
 
+    /// <summary>
+    ///     Checks whether the variable is already defined
+    /// </summary>
     private bool ContainsName(string name) =>
         _scopes.Any(scope => scope.ContainsValue(name));
 
+
+    /// <summary>
+    ///     Returns *probably* escaped and unique name for the variable
+    /// </summary>
     private string FindName(string name) => TryFindName(name) ?? name;
 
+    /// <summary>
+    ///     Registes a name in the current scope
+    /// </summary>
     private void RegisterName(RsName name)
     {
         void SaveName(string newName, string initial)
@@ -158,7 +229,7 @@ public partial class Generator
             _scopes.Peek()[newName] = newName;
             _scopes.Peek()[initial] = newName;
         }
-        
+
         if (!ContainsName(name.Name))
         {
             SaveName(name.Name, name.Name);
@@ -168,7 +239,7 @@ public partial class Generator
         var suffix = 1;
         while (ContainsName(name.Name + suffix))
             suffix++;
-        
+
         SaveName(name.Name + suffix, name.Name);
     }
 

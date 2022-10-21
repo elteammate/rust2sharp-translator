@@ -3,6 +3,9 @@ using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Generator;
 
+/// <summary>
+///     Generates everything that can be put in blocks
+/// </summary>
 public partial class Generator
 {
     private void GenerateExpressionStatement(RsExpression expression)
@@ -37,10 +40,7 @@ public partial class Generator
 
     private void GenerateIfImpl(RsIf @if)
     {
-        using (Context(TranslationContext.Expression))
-        {
-            AddLine("if (%)", @if.Condition);
-        }
+        using (Context(TranslationContext.Expression)) AddLine("if (%)", @if.Condition);
 
         Generate(@if.Then);
 
@@ -58,28 +58,26 @@ public partial class Generator
         if (_context == TranslationContext.Expression && (@if.Then as RsBlock)?.Expression != null)
             using (LambdaBlock())
             using (Block())
-            {
                 GenerateIfImpl(@if);
-            }
         else
             GenerateIfImpl(@if);
     }
 
     private void GenerateReturn(RsReturn @return)
     {
-        using (Context(TranslationContext.Expression)) 
+        using (Context(TranslationContext.Expression))
             AddLine("return %;", @return.Value.Unwrap());
     }
 
     private void GenerateContinue()
     {
-        using (Context(TranslationContext.Expression)) 
+        using (Context(TranslationContext.Expression))
             AddLine("continue;");
     }
 
     private void GenerateBreak(RsBreak @break)
     {
-        using (Context(TranslationContext.Expression)) 
+        using (Context(TranslationContext.Expression))
             if (@break.Value == null)
                 AddLine("break;");
             else
@@ -88,7 +86,7 @@ public partial class Generator
 
     private void GenerateLoop(RsLoop loop)
     {
-        using (Context(TranslationContext.Expression)) 
+        using (Context(TranslationContext.Expression))
             AddLine("while (true)");
 
         using (Context(TranslationContext.Block))
@@ -96,8 +94,8 @@ public partial class Generator
     }
 
     private void GenerateWhile(RsWhile @while)
-    {        
-        using (Context(TranslationContext.Expression)) 
+    {
+        using (Context(TranslationContext.Expression))
             AddLine("while (%)", @while.Condition);
 
         using (Context(TranslationContext.Block))
@@ -106,12 +104,12 @@ public partial class Generator
 
     private void GenerateFor(RsFor @for)
     {
-        using (Context(TranslationContext.Expression)) 
+        using (Context(TranslationContext.Expression))
             AddLine("foreach (var | in %)", @for.Iterator);
 
         RegisterName(@for.Binding);
         AddAtWaypoint("%", @for.Binding);
-        
+
         using (Context(TranslationContext.Block))
             Generate(@for.Body);
     }
@@ -122,25 +120,19 @@ public partial class Generator
         {
             AddLine("switch (%)", match.Value.Unwrap());
             using (Block())
-            {
                 foreach (var arm in match.Arms)
                 {
                     if (arm.Pattern is RsUnderscore)
-                    {
                         AddLine("default:");
-                    }
                     else
-                    {
                         AddLine("case %:", arm.Pattern);
-                    }
-                    
+
                     using (Indent())
                     {
                         GenerateExpressionStatement(arm.Body);
                         AddLine("break;");
                     }
                 }
-            }
         }
     }
 
@@ -149,9 +141,7 @@ public partial class Generator
         if (_context == TranslationContext.Expression && match.Arms.All(a => a.Body is RsBlock))
             using (LambdaBlock())
             using (Block())
-            {
                 GenerateMatchImpl(match);
-            }
         else
             GenerateMatchImpl(match);
     }

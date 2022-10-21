@@ -2,8 +2,31 @@ using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
 
+/// <summary>
+///     Generates everything at module level
+/// </summary>
 public partial class Generator
 {
+    private void GenerateDocumented(RsDocumented documented)
+    {
+        if (documented.Comment is RsLineDocComment lineComment)
+            AddLine("///" + lineComment.Content);
+        else if (documented.Comment is RsBlockDocComment docComment)
+        {
+            AddLine("/**");
+            using (Indent())
+                foreach (var line in docComment.Content.Split("\n"))
+                {
+                    var trimmed = line.Trim();
+                    if (trimmed.Length != 0) AddLine(trimmed);
+                }
+
+            AddLine("*/");
+        }
+
+        Generate(documented.Node);
+    }
+
     private void GenerateModule(RsModule module)
     {
         AddLine("public static class %", module.Name!);
@@ -13,6 +36,7 @@ public partial class Generator
 
     private void GenerateFunction(RsFunction function)
     {
+        Add("public ");
         if (function.Body == null) Add("abstract ");
 
         using (Context(TranslationContext.Expression))
@@ -44,9 +68,9 @@ public partial class Generator
         using var _2 = Context(TranslationContext.Block);
 
         foreach (var item in block.Statements) Generate(item);
-        
+
         if (block.Expression == null) return;
-        
+
         if (outerContext == TranslationContext.Module)
             using (Context(TranslationContext.Expression))
                 AddLine("return %;", block.Expression);
@@ -76,10 +100,7 @@ public partial class Generator
         Add("public partial class %", @struct.Name);
         GenerateGenerics(@struct.Generics);
 
-        using (Block())
-        {
-            AddJoined("", @struct.Fields.ToArray<RsNode>());
-        }
+        using (Block()) AddJoined("", @struct.Fields.ToArray<RsNode>());
     }
 
     private void GenerateField(RsStructField field)
@@ -92,17 +113,17 @@ public partial class Generator
         var name = @enum.Name;
         Add("public abstract partial class %", name);
         GenerateGenerics(@enum.Generics);
-        
+
         using (Block())
-        {
             foreach (var option in @enum.Variants)
             {
                 Add("public class % : %", option.Name, name);
                 GenerateGenerics(@enum.Generics);
-                using (Block()) AddJoined("", option.Fields.ToArray<RsNode>());
+                using (Block())
+                using (Context(TranslationContext.Expression))
+                    AddJoined("", option.Fields.ToArray<RsNode>());
                 AddLine();
             }
-        }
     }
 
     private void GenerateTrait(RsTrait trait)
@@ -110,22 +131,17 @@ public partial class Generator
         Add("public interface %", trait.Name);
         GenerateGenerics(trait.Generics);
 
-        using (Block())
-        {
-            AddJoined("", trait.Functions.ToArray<RsNode>());
-        }
+        using (Block()) AddJoined("", trait.Functions.ToArray<RsNode>());
     }
 
     private void GenerateImpl(RsImpl impl)
     {
-        using (Context(TranslationContext.Expression)) {
+        using (Context(TranslationContext.Expression))
+        {
             Add("public partial class %", impl.Type);
             if (impl.Trait != null) Add(" : %", impl.Trait);
         }
 
-        using (Block())
-        {
-            AddJoined("\n", impl.Functions.ToArray<RsNode>());
-        }
+        using (Block()) AddJoined("\n", impl.Functions.ToArray<RsNode>());
     }
 }

@@ -6,6 +6,9 @@ using Rust2SharpTranslator.Utils;
 
 namespace Rust2SharpTranslator.Parser;
 
+/// <summary>
+///     Parses everything that might be on top level
+/// </summary>
 public partial class Parser
 {
     public RsModule ParseTopLevel()
@@ -30,6 +33,19 @@ public partial class Parser
             Keyword { Value: KeywordType.Trait } => ParseTrait(),
             Keyword { Value: KeywordType.Impl } => ParseImpl(),
             Keyword { Value: KeywordType.Enum } => ParseEnum(),
+
+            Comment { Type: CommentType.DocLine } comment =>
+                _stream.Skip().And(() => new RsDocumented(
+                    new RsLineDocComment(comment.Value),
+                    ParseTopLevelObject())),
+
+            Comment { Type: CommentType.DocBlock } comment =>
+                _stream.Skip().And(() => new RsDocumented(
+                    new RsBlockDocComment(comment.Value),
+                    ParseTopLevelObject())),
+
+            Keyword { Value: KeywordType.Pub } => _stream.Skip()
+                .And(() => new RsPub(ParseTopLevelObject())),
             _ => throw new UnexpectedTokenException(token)
         };
     }

@@ -193,3 +193,13 @@ public record RsTypeDecl(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generi
 
 public record RsClosure
     (RsParameter[] Parameters, RsExpression? ReturnType, RsExpression Body) : RsExpression;
+
+public abstract record RsComment : RsNode;
+
+public record RsLineDocComment(string Content) : RsComment;
+
+public record RsBlockDocComment(string Content) : RsComment;
+
+public record RsDocumented(RsComment Comment, RsNode Node) : RsNode;
+
+public record RsPub(RsNode Node) : RsNode;

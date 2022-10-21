@@ -2,6 +2,9 @@ using Rust2SharpTranslator.Parser;
 
 namespace Rust2SharpTranslator.Generator;
 
+/// <summary>
+///     Maps rust nodes to generator methods
+/// </summary>
 public partial class Generator
 {
     private TranslationContext _context = TranslationContext.Module;
@@ -18,6 +21,14 @@ public partial class Generator
 
             case RsModule module:
                 GenerateModule(module);
+                break;
+
+            case RsDocumented documented:
+                GenerateDocumented(documented);
+                break;
+
+            case RsPub pub:
+                Generate(pub.Node);
                 break;
 
             case RsFunction function:
@@ -47,48 +58,47 @@ public partial class Generator
             case RsReturn @return:
                 GenerateReturn(@return);
                 break;
-            
+
             case RsBreak @break:
                 GenerateBreak(@break);
                 break;
-            
+
             case RsLoop loop:
                 GenerateLoop(loop);
                 break;
-            
+
             case RsWhile @while:
                 GenerateWhile(@while);
                 break;
-            
+
             case RsFor @for:
                 GenerateFor(@for);
                 break;
-            
+
             case RsMatch match:
                 GenerateMatch(match);
                 break;
-            
+
             case RsContinue:
                 GenerateContinue();
                 break;
-            
+
             case RsStruct @struct:
                 GenerateStruct(@struct);
                 break;
-            
+
             case RsEnum @enum:
                 GenerateEnum(@enum);
                 break;
-            
+
             case RsTrait trait:
                 GenerateTrait(trait);
                 break;
-            
-            
+
             case RsImpl impl:
                 GenerateImpl(impl);
                 break;
-            
+
             case RsStructField field:
                 GenerateField(field);
                 break;
