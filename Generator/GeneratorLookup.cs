@@ -38,6 +38,14 @@ public partial class Generator
             case RsTypeDecl typeDecl:
                 GenerateTypeDecl(typeDecl);
                 break;
+           
+            case RsStatic staticDecl:
+                GenerateStatic(staticDecl);
+                break;
+            
+            case RsConst constDecl:
+                GenerateConst(constDecl);
+                break;
 
             case RsGeneric generic:
                 GenerateGeneric(generic);

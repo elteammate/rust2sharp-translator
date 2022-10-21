@@ -3,9 +3,9 @@
 - (?) Функции внутри функций
 - (?) Замыкания
 - use
-- type
+- ~~type~~
 - where, trait bounds
 - ~~pub~~
-- static, const
+- ~~static, const~~
 - ~~ДОКУМЕНТАЦИЯ!!!~~
 - атрибуты

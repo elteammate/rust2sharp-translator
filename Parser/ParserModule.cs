@@ -34,6 +34,8 @@ public partial class Parser
             Keyword { Value: KeywordType.Impl } => ParseImpl(),
             Keyword { Value: KeywordType.Enum } => ParseEnum(),
             Keyword { Value: KeywordType.Type } => ParseTypeDecl(),
+            Keyword { Value: KeywordType.Static } => ParseStatic(),
+            Keyword { Value: KeywordType.Const } => ParseConst(),
 
             Comment { Type: CommentType.DocLine } comment =>
                 _stream.Skip().And(() => new RsDocumented(
@@ -229,6 +231,31 @@ public partial class Parser
         var type = ParseExpression();
         Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Semi });
         return new RsTypeDecl(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2, type);
+    }
+
+    private RsStatic ParseStatic()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.Static));
+        _stream.IfMatchConsume(new Keyword(KeywordType.Mut));
+        var name = ParseName();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Colon });
+        var type = ParseExpression(BinaryPrecedence.Assign + 1);
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Eq });
+        var value = ParseExpression();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Semi });
+        return new RsStatic(name, type, value);
+    }
+    
+    private RsConst ParseConst()
+    {
+        Debug.Assert(_stream.Next() == new Keyword(KeywordType.Const));
+        var name = ParseName();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Colon });
+        var type = ParseExpression(BinaryPrecedence.Assign + 1);
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Eq });
+        var value = ParseExpression();
+        Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.Semi });
+        return new RsConst(name, type, value);
     }
 }
 

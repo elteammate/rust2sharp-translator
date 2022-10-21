@@ -130,6 +130,21 @@ public partial class Generator
 
     private void GenerateTypeDecl(RsTypeDecl typeDecl)
     {
-        AddLine("public using % = %;", typeDecl.Name, typeDecl.Definition);
+        using (Context(TranslationContext.Expression))
+        {
+            Add("public using %", typeDecl.Name);
+            AddJoined(", ", typeDecl.Generics.ToArray<RsNode>(), "<", ">", false);
+            AddLine(" = %;", typeDecl.Definition);
+        }
+    }
+    
+    private void GenerateStatic(RsStatic @static)
+    {
+        AddLine("public static % % = %;", @static.Type, @static.Name, @static.Value);
+    }
+    
+    private void GenerateConst(RsConst @const)
+    {
+        AddLine("public const % % = %;", @const.Type, @const.Name, @const.Value);
     }
 }
