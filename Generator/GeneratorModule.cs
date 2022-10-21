@@ -61,23 +61,6 @@ public partial class Generator
         GenerateModule(rootModule);
     }
 
-    private void GenerateBlock(RsBlock block)
-    {
-        var outerContext = _context;
-        using var _1 = Block();
-        using var _2 = Context(TranslationContext.Block);
-
-        foreach (var item in block.Statements) Generate(item);
-
-        if (block.Expression == null) return;
-
-        if (outerContext == TranslationContext.Module)
-            using (Context(TranslationContext.Expression))
-                AddLine("return %;", block.Expression);
-        else
-            Generate(block.Expression);
-    }
-
     private void GenerateGeneric(RsGeneric generic)
         => Generate(generic.Name);
 
