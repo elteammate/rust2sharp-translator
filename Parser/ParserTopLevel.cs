@@ -66,9 +66,7 @@ public partial class Parser
                 parameters.Add(new RsParameter((paramName as RsName).Unwrap(), type));
             }
             else
-            {
                 parameters.Add(new RsSelfParameter(paramName));
-            }
 
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
@@ -90,11 +88,11 @@ public partial class Parser
             body
         );
     }
-    
+
     private RsStructField[] ParseStructFields()
     {
         var fields = new List<RsStructField>();
-        
+
         Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.OpenBrace });
 
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.CloseBrace)))
@@ -105,7 +103,7 @@ public partial class Parser
             fields.Add(new RsStructField(fieldName, fieldType));
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
-        
+
         return fields.ToArray();
     }
 
@@ -116,9 +114,9 @@ public partial class Parser
         var lifetimesAndGenerics = ParseLifetimesAndGenerics();
 
         return new RsStruct(
-            name, 
-            lifetimesAndGenerics.Item1, 
-            lifetimesAndGenerics.Item2, 
+            name,
+            lifetimesAndGenerics.Item1,
+            lifetimesAndGenerics.Item2,
             ParseStructFields()
         );
     }
@@ -128,47 +126,44 @@ public partial class Parser
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.Enum));
         var name = ParseName();
         var lifetimesAndGenerics = ParseLifetimesAndGenerics();
-        
+
         var variants = new List<RsStruct>();
-        
+
         Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.OpenBrace });
 
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.CloseBrace)))
         {
             var variantName = ParseName();
             if (_stream.Peek() == new Punctuation(PunctuationType.OpenBrace))
-            {
                 variants.Add(new RsStruct(
                     variantName,
                     Array.Empty<RsLifetime>(),
                     Array.Empty<RsGeneric>(),
                     ParseStructFields()
                 ));
-            }
             else
-            {
                 variants.Add(new RsStruct(
                     variantName,
                     Array.Empty<RsLifetime>(),
                     Array.Empty<RsGeneric>(),
                     Array.Empty<RsStructField>()
                 ));
-            }
-            
+
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
-        
-        return new RsEnum(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2, variants.ToArray());
+
+        return new RsEnum(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2,
+            variants.ToArray());
     }
-    
+
     public RsTrait ParseTrait()
     {
         Debug.Assert(_stream.Next() == new Keyword(KeywordType.Trait));
         var name = ParseName();
         var lifetimesAndGenerics = ParseLifetimesAndGenerics();
-        
+
         var functions = new List<RsFunction>();
-        
+
         Debug.Assert(_stream.Next() is Punctuation { Value: PunctuationType.OpenBrace });
 
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.CloseBrace)))
@@ -177,8 +172,9 @@ public partial class Parser
             functions.Add(fn);
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
-        
-        return new RsTrait(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2, functions.ToArray());
+
+        return new RsTrait(name, lifetimesAndGenerics.Item1, lifetimesAndGenerics.Item2,
+            functions.ToArray());
     }
 
     public RsImpl ParseImpl()
@@ -196,7 +192,7 @@ public partial class Parser
         var functions = new List<RsFunction>();
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.CloseBrace)))
             functions.Add(ParseFunction());
-        
+
         var type = forWhat ?? what;
         var trait = forWhat == null ? null : what;
         return new RsImpl(type, trait, functions.ToArray());
@@ -210,8 +206,10 @@ public class __TestTopLevelParser__
     {
         new Parser(new Lexer.Lexer("mod a { mod b {} }").Lex()).ParseTopLevel()
             .Should().BeEquivalentTo(
-                new RsModule(null, new RsNode[] {
-                    new RsModule(new RsName("a"), new RsNode[] {
+                new RsModule(null, new RsNode[]
+                {
+                    new RsModule(new RsName("a"), new RsNode[]
+                    {
                         new RsModule(new RsName("b"), Array.Empty<RsNode>())
                     })
                 }));
@@ -220,23 +218,28 @@ public class __TestTopLevelParser__
     [Test]
     public void TopLevelParser_TestFunctionParsing()
     {
-        new Parser(new Lexer.Lexer("fn foo<'a, T>(x: &'a str, b: T) -> &T { x }").Lex()).ParseTopLevel()
+        new Parser(new Lexer.Lexer("fn foo<'a, T>(x: &'a str, b: T) -> &T { x }").Lex())
+            .ParseTopLevel()
             .Should().BeEquivalentTo(
-                new RsModule(null, new RsNode[] {
+                new RsModule(null, new RsNode[]
+                {
                     new RsFunction(
                         new RsName("foo"),
-                        new[] {
+                        new[]
+                        {
                             new RsLifetime(new RsLabel("a"))
                         },
-                        new[] {
+                        new[]
+                        {
                             new RsGeneric(new RsName("T"), Array.Empty<RsExpression>())
                         },
-                        new [] {
+                        new[]
+                        {
                             new RsParameter(new RsName("x"), new RsRef(
-                                new RsLabel("a"), 
+                                new RsLabel("a"),
                                 false,
                                 new RsName("str")
-                                )),
+                            )),
                             new RsParameter(new RsName("b"), new RsName("T"))
                         },
                         new RsRef(null, false, new RsName("T")),
@@ -248,16 +251,21 @@ public class __TestTopLevelParser__
     [Test]
     public void TopLevelParser_TestStructParsing()
     {
-        new Parser(new Lexer.Lexer("struct Foo<'a, Bar> { x: Bar, y: i32, f: &'a Baz }").Lex()).ParseStruct()
+        new Parser(new Lexer.Lexer("struct Foo<'a, Bar> { x: Bar, y: i32, f: &'a Baz }").Lex())
+            .ParseStruct()
             .Should().BeEquivalentTo(
-                new RsStruct(new RsName("Foo"), new [] {
+                new RsStruct(new RsName("Foo"), new[]
+                {
                     new RsLifetime(new RsLabel("a"))
-                }, new [] {
+                }, new[]
+                {
                     new RsGeneric(new RsName("Bar"), Array.Empty<RsExpression>())
-                }, new [] {
+                }, new[]
+                {
                     new RsStructField(new RsName("x"), new RsName("Bar")),
                     new RsStructField(new RsName("y"), new RsName("i32")),
-                    new RsStructField(new RsName("f"), new RsRef(new RsLabel("a"), false, new RsName("Baz")))
+                    new RsStructField(new RsName("f"),
+                        new RsRef(new RsLabel("a"), false, new RsName("Baz")))
                 }));
     }
 
@@ -266,43 +274,61 @@ public class __TestTopLevelParser__
     {
         new Parser(new Lexer.Lexer("enum Option<T> {Some {value: T}, None}").Lex()).ParseEnum()
             .Should().BeEquivalentTo(
-                new RsEnum(new RsName("Option"), Array.Empty<RsLifetime>(), new [] {
+                new RsEnum(new RsName("Option"), Array.Empty<RsLifetime>(), new[]
+                {
                     new RsGeneric(new RsName("T"), Array.Empty<RsExpression>())
-                }, new [] {
-                    new RsStruct(new RsName("Some"), Array.Empty<RsLifetime>(), Array.Empty<RsGeneric>(), new [] {
-                        new RsStructField(new RsName("value"), new RsName("T"))
-                    }),
-                    new RsStruct(new RsName("None"), Array.Empty<RsLifetime>(), Array.Empty<RsGeneric>(), Array.Empty<RsStructField>())
+                }, new[]
+                {
+                    new RsStruct(new RsName("Some"), Array.Empty<RsLifetime>(),
+                        Array.Empty<RsGeneric>(), new[]
+                        {
+                            new RsStructField(new RsName("value"), new RsName("T"))
+                        }),
+                    new RsStruct(new RsName("None"), Array.Empty<RsLifetime>(),
+                        Array.Empty<RsGeneric>(), Array.Empty<RsStructField>())
                 }));
     }
 
     [Test]
     public void TopLevelParser_TestTraitParsing()
     {
-        new Parser(new Lexer.Lexer("trait Foo<'a, T> { fn bar(&self, x: T) -> T; }").Lex()).ParseTrait()
+        new Parser(new Lexer.Lexer("trait Foo<'a, T> { fn bar(&self, x: T) -> T; }").Lex())
+            .ParseTrait()
             .Should().BeEquivalentTo(
-                new RsTrait(new RsName("Foo"), new [] {
+                new RsTrait(new RsName("Foo"), new[]
+                {
                     new RsLifetime(new RsLabel("a"))
-                }, new [] {
+                }, new[]
+                {
                     new RsGeneric(new RsName("T"), Array.Empty<RsExpression>())
-                }, new [] {
-                    new RsFunction(new RsName("bar"), Array.Empty<RsLifetime>(), Array.Empty<RsGeneric>(), new [] {
-                        new RsParameter(new RsName("self"), new RsRef(null, true, new RsName("Self"))),
-                        new RsParameter(new RsName("x"), new RsName("T"))
-                    }, new RsName("T"), null)
+                }, new[]
+                {
+                    new RsFunction(new RsName("bar"), Array.Empty<RsLifetime>(),
+                        Array.Empty<RsGeneric>(), new[]
+                        {
+                            new RsParameter(new RsName("self"),
+                                new RsRef(null, true, new RsName("Self"))),
+                            new RsParameter(new RsName("x"), new RsName("T"))
+                        }, new RsName("T"), null)
                 }));
     }
 
     [Test]
     public void TopLevelParser_TestImplParsing()
     {
-        new Parser(new Lexer.Lexer("impl<'a, T> Foo<'a, T> { fn bar(&self, x: T) -> T {x} }").Lex()).ParseImpl()
+        new Parser(new Lexer.Lexer("impl<'a, T> Foo<'a, T> { fn bar(&self, x: T) -> T {x} }").Lex())
+            .ParseImpl()
             .Should().BeEquivalentTo(
-                new RsImpl(new RsName("Foo"), null, new [] {
-                    new RsFunction(new RsName("bar"), Array.Empty<RsLifetime>(), Array.Empty<RsGeneric>(), new [] {
-                        new RsParameter(new RsName("self"), new RsRef(null, true, new RsName("Self"))),
-                        new RsParameter(new RsName("x"), new RsName("T"))
-                    }, new RsName("T"), new RsBlock(Array.Empty<RsStatement>(), new RsName("x")))
+                new RsImpl(new RsName("Foo"), null, new[]
+                {
+                    new RsFunction(new RsName("bar"), Array.Empty<RsLifetime>(),
+                        Array.Empty<RsGeneric>(), new[]
+                        {
+                            new RsParameter(new RsName("self"),
+                                new RsRef(null, true, new RsName("Self"))),
+                            new RsParameter(new RsName("x"), new RsName("T"))
+                        }, new RsName("T"),
+                        new RsBlock(Array.Empty<RsStatement>(), new RsName("x")))
                 }));
     }
 }

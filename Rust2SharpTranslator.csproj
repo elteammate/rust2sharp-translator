@@ -9,25 +9,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="PythonWebInterface\temp" />
+        <Folder Include="PythonWebInterface\temp"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="PythonWebInterface\__pycache__\**" />
+        <Compile Remove="PythonWebInterface\__pycache__\**"/>
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Remove="PythonWebInterface\__pycache__\**" />
+        <EmbeddedResource Remove="PythonWebInterface\__pycache__\**"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="PythonWebInterface\__pycache__\**" />
+        <None Remove="PythonWebInterface\__pycache__\**"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="6.7.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
-        <PackageReference Include="NUnit" Version="3.13.3" />
+        <PackageReference Include="FluentAssertions" Version="6.7.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2"/>
+        <PackageReference Include="NUnit" Version="3.13.3"/>
     </ItemGroup>
 
 </Project>

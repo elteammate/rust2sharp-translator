@@ -164,7 +164,8 @@ public record RsStruct(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics
     RsStructField[] Fields
 ) : RsExpression;
 
-public record RsEnum(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsStruct[] Variants) : RsNode;
+public record RsEnum(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsStruct[] Variants
+) : RsNode;
 
 public record RsParameter(RsName Name, RsExpression Type) : RsNode;
 
@@ -174,7 +175,9 @@ public record RsFunction(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generi
     RsParameter[] Parameters, RsExpression ReturnType, RsBlock? Body
 ) : RsNode;
 
-public record RsTrait(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics, RsFunction[] Functions) : RsNode;
+public record RsTrait(RsName Name, RsLifetime[] Lifetimes, RsGeneric[] Generics,
+    RsFunction[] Functions
+) : RsNode;
 
 public record RsImpl(RsExpression Type, RsExpression? Trait, RsFunction[] Functions) : RsNode;
 

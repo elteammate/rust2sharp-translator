@@ -1,4 +1,3 @@
-using Rust2SharpTranslator.Lexer;
 using Rust2SharpTranslator.Parser;
 using Rust2SharpTranslator.Utils;
 
@@ -6,23 +5,6 @@ namespace Rust2SharpTranslator.Generator;
 
 public partial class Generator
 {
-    private enum BinaryPrecedence
-    {
-        Assign = 0,
-        Or,
-        And,
-        BitOr,
-        BitXor,
-        BitAnd,
-        Equality,
-        Comparison,
-        Shift,
-        Additive,
-        Multiplicative,
-        Range,
-        Higher,
-    }
-
     private static BinaryPrecedence GetPrecedence(RsExpression op)
     {
         return op switch
@@ -66,7 +48,7 @@ public partial class Generator
 
             RsRange => BinaryPrecedence.Range,
             RsRangeInclusive => BinaryPrecedence.Range,
-            
+
             _ => BinaryPrecedence.Higher
         };
     }
@@ -114,10 +96,10 @@ public partial class Generator
 
             RsRange => "..",
             RsRangeInclusive => "..=",
-            
+
             RsUnaryMinus => "-",
             RsNot => "+",
-            
+
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -131,7 +113,7 @@ public partial class Generator
             case RsAs cast:
                 Add("((%)%)", cast.Right, cast.Left);
                 break;
-            
+
             case RsBinaryOp op:
                 var precedence = GetPrecedence(op);
                 var leftPrecedence = GetPrecedence(op.Left);
@@ -141,7 +123,7 @@ public partial class Generator
                 Add(GetOperatorRepresentation(op));
                 Add(rightPrecedence >= precedence ? " %" : " (%) ", op.Right);
                 break;
-            
+
             case RsUnaryOp:
                 switch (expression)
                 {
@@ -163,26 +145,26 @@ public partial class Generator
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                
+
                 break;
-            
+
             case RsField field:
                 Add(
-                    field.Value is not RsBinaryOp or RsUnaryOp ? "%.%" : "(%).%", 
+                    field.Value is not RsBinaryOp or RsUnaryOp ? "%.%" : "(%).%",
                     field.Value,
                     field.Field
                 );
                 break;
-            
+
             case RsPath path:
                 Add("%.%", path.Prefix.Unwrap(), path.Name);
                 break;
-            
+
             case RsCall call:
                 Generate(call.Function);
                 AddJoined(", ", call.Arguments.ToArray<RsNode>(), "(", ")");
                 break;
-            
+
             case RsIndex index:
                 Add("%[%]", index.Value, index.Index);
                 break;
@@ -196,59 +178,81 @@ public partial class Generator
                     if (name != ctor.Parameters.Last().Item1)
                         Add(", ");
                 }
+
                 Add(" })");
                 break;
             }
-            
+
             case RsLiteralUnit:
                 Add("void");
                 break;
-            
+
             case RsLiteralInt @int:
                 Add(@int.Repr);
                 break;
-            
+
             case RsLiteralFloat @float:
                 Add(@float.Repr);
                 break;
-            
+
             case RsLiteralChar @char:
                 Add("'");
                 Add(@char.Repr);
                 Add("'");
                 break;
-            
+
             case RsLiteralString @string:
                 Add("\"");
                 Add(@string.Repr);
                 Add("\"");
                 break;
-            
+
             case RsLiteralByte @byte:
                 Add("b'");
                 Add(@byte.Repr);
                 Add("'");
                 break;
-            
+
             case RsLiteralByteString byteString:
                 Add("b\"");
                 Add(byteString.Repr);
                 Add("\"");
                 break;
-            
+
             case RsLiteralArray array:
                 Add("new []{ ");
                 AddJoined(", ", array.Elements.ToArray<RsNode>());
                 Add(" }");
                 break;
-            
+
             case RsBlock block:
-                using (LambdaBlock()) Generate(block);
+                using (LambdaBlock())
+                {
+                    Generate(block);
+                }
+
                 break;
 
             default:
                 Add($"/* Not implemented {expression} */");
                 break;
         }
+    }
+
+    private enum BinaryPrecedence
+    {
+        Assign = 0,
+        Or,
+        And,
+        BitOr,
+        BitXor,
+        BitAnd,
+        Equality,
+        Comparison,
+        Shift,
+        Additive,
+        Multiplicative,
+        Range,
+        Higher
     }
 }

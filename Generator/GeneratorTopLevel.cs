@@ -14,8 +14,12 @@ public partial class Generator
     private void GenerateFunction(RsFunction function)
     {
         if (function.Body == null) Add("abstract ");
-        
-        using(Context(TranslationContext.Expression)) Add("% %", function.ReturnType, function.Name);
+
+        using (Context(TranslationContext.Expression))
+        {
+            Add("% %", function.ReturnType, function.Name);
+        }
+
         GenerateGenerics(function.Generics);
         GenerateParameters(function.Parameters);
 
@@ -36,22 +40,24 @@ public partial class Generator
     {
         using var _1 = Block();
         using var _2 = Context(TranslationContext.Function);
-        
+
         foreach (var item in block.Statements) Generate(item);
         if (block.Expression != null)
             using (Context(TranslationContext.Expression))
+            {
                 AddLine("return %;", block.Expression);
+            }
     }
 
-    private void GenerateGeneric(RsGeneric generic) 
+    private void GenerateGeneric(RsGeneric generic)
         => Generate(generic.Name);
 
-    private void GenerateGenerics(IEnumerable<RsGeneric> generics) 
+    private void GenerateGenerics(IEnumerable<RsGeneric> generics)
         => AddJoined(", ", generics.ToArray<RsNode>(), "<", ">", false);
 
-    private void GenerateParameter(RsParameter parameter) 
+    private void GenerateParameter(RsParameter parameter)
         => Add("% %", parameter.Type, parameter.Name);
-    
+
     private void GenerateParameters(IEnumerable<RsParameter> parameters)
         => AddJoined(", ", parameters.ToArray<RsNode>(), "(", ")");
 }

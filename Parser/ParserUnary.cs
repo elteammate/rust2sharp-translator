@@ -237,7 +237,7 @@ public partial class Parser
 
             case Punctuation { Value: PunctuationType.And }:
                 _stream.Next();
-                var lifetime = _stream.Peek() is Literal {Type: LiteralType.Label}
+                var lifetime = _stream.Peek() is Literal { Type: LiteralType.Label }
                     ? new RsLabel(((Literal)_stream.Next()!).Value)
                     : null;
                 return _stream.IfMatchConsume(new Keyword(KeywordType.Mut))
