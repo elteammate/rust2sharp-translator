@@ -54,6 +54,10 @@ public partial class Generator
             case RsGeneric generic:
                 GenerateGeneric(generic);
                 break;
+            
+            case RsEmptyStatement:
+                AddLine();
+                break;
 
             case RsParameter parameter:
                 GenerateParameter(parameter);

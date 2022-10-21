@@ -48,15 +48,19 @@ public partial class Generator
             Add("% %", function.ReturnType, function.Name);
         }
 
-        GenerateGenerics(function.Generics);
-        GenerateParameters(function.Parameters);
+        using (Context(TranslationContext.Expression))
+        {
+            GenerateGenerics(function.Generics);
+            GenerateParameters(function.Parameters);
+        }
 
         GenerateGenericBounds(function.Generics);
 
-        if (function.Body == null)
-            AddLine(";");
-        else
-            GenerateBlock(function.Body);
+        using (Context(TranslationContext.Module))
+            if (function.Body == null)
+                AddLine(";");
+            else
+                GenerateBlock(function.Body);
     }
 
     private void GenerateTopLevel(RsModule module)

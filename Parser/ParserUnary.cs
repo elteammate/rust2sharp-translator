@@ -48,10 +48,13 @@ public partial class Parser
         while (!_stream.IfMatchConsume(new Punctuation(PunctuationType.Gt)))
         {
             var token = _stream.Peek();
+            var shouldBound = false;
+            
             switch (token)
             {
                 case Identifier:
                     generics.Add(new RsGeneric(ParseName(), Array.Empty<RsExpression>()));
+                    shouldBound = true;
                     break;
                 case Literal { Type: LiteralType.Label } label:
                     _stream.Next();
@@ -61,19 +64,22 @@ public partial class Parser
                     throw new UnexpectedTokenException(token);
             }
 
-            var bounds = new List<RsExpression>();
-            if (_stream.Peek() is Punctuation { Value: PunctuationType.Colon })
+            if (shouldBound)
             {
-                _stream.Next();
-                while (_stream.Peek() is not Punctuation { Value: PunctuationType.Comma }
-                       and not Punctuation { Value: PunctuationType.Gt })
+                var bounds = new List<RsExpression>();
+                if (_stream.Peek() is Punctuation { Value: PunctuationType.Colon })
                 {
-                    bounds.Add(ParseExpression(BinaryPrecedence.Add + 1));
-                    _stream.IfMatchConsume(new Punctuation(PunctuationType.Plus));
+                    _stream.Next();
+                    while (_stream.Peek() is not Punctuation { Value: PunctuationType.Comma }
+                           and not Punctuation { Value: PunctuationType.Gt })
+                    {
+                        bounds.Add(ParseExpression(BinaryPrecedence.Add + 1));
+                        _stream.IfMatchConsume(new Punctuation(PunctuationType.Plus));
+                    }
                 }
-            }
 
-            generics[^1] = new RsGeneric(generics[^1].Name, bounds.ToArray());
+                generics[^1] = new RsGeneric(generics[^1].Name, bounds.ToArray());
+            }
 
             _stream.IfMatchConsume(new Punctuation(PunctuationType.Comma));
         }
