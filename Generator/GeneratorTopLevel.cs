@@ -6,7 +6,7 @@ public partial class Generator
 {
     private void GenerateModule(RsModule module)
     {
-        AddLine("static class %", module.Name!);
+        AddLine("public static class %", module.Name!);
         using var _ = Block();
         AddJoined("\n", module.Nodes);
     }
@@ -17,14 +17,14 @@ public partial class Generator
 
         using (Context(TranslationContext.Expression))
         {
-            Add("% %", function.ReturnType, function.Name);
+            Add("static % %", function.ReturnType, function.Name);
         }
 
         GenerateGenerics(function.Generics);
         GenerateParameters(function.Parameters);
 
         if (function.Body == null)
-            Add(";");
+            AddLine(";");
         else
             GenerateBlock(function.Body);
     }
@@ -67,4 +67,49 @@ public partial class Generator
 
     private void GenerateParameters(IEnumerable<RsParameter> parameters)
         => AddJoined(", ", parameters.ToArray<RsNode>(), "(", ")");
+
+    private void GenerateStruct(RsStruct @struct)
+    {
+        Add("public partial class %", @struct.Name);
+        GenerateGenerics(@struct.Generics);
+
+        using (Block())
+        {
+            AddJoined("", @struct.Fields.ToArray<RsNode>());
+        }
+    }
+
+    private void GenerateField(RsStructField field)
+    {
+        AddLine("public % %;", field.Type, field.Name);
+    }
+
+    private void GenerateEnum(RsEnum @enum)
+    {
+        var name = @enum.Name;
+        Add("public abstract partial class %", name);
+        GenerateGenerics(@enum.Generics);
+        
+        using (Block())
+        {
+            foreach (var option in @enum.Variants)
+            {
+                Add("public class % : %", option.Name, name);
+                GenerateGenerics(@enum.Generics);
+                using (Block()) AddJoined("", option.Fields.ToArray<RsNode>());
+                AddLine();
+            }
+        }
+    }
+
+    private void GenerateTrait(RsTrait trait)
+    {
+        Add("public interface %", trait.Name);
+        GenerateGenerics(trait.Generics);
+
+        using (Block())
+        {
+            AddJoined("", trait.Functions.ToArray<RsNode>());
+        }
+    }
 }

@@ -26,6 +26,10 @@ public partial class Parser
         {
             Keyword { Value: KeywordType.Mod } => ParseModule(),
             Keyword { Value: KeywordType.Fn } => ParseFunction(),
+            Keyword { Value: KeywordType.Struct } => ParseStruct(),
+            Keyword { Value: KeywordType.Trait } => ParseTrait(),
+            Keyword { Value: KeywordType.Impl } => ParseImpl(),
+            Keyword { Value: KeywordType.Enum } => ParseEnum(),
             _ => throw new UnexpectedTokenException(token)
         };
     }

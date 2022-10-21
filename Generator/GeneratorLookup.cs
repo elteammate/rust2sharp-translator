@@ -71,6 +71,22 @@ public partial class Generator
             case RsContinue:
                 GenerateContinue();
                 break;
+            
+            case RsStruct @struct:
+                GenerateStruct(@struct);
+                break;
+            
+            case RsEnum @enum:
+                GenerateEnum(@enum);
+                break;
+            
+            case RsTrait trait:
+                GenerateTrait(trait);
+                break;
+            
+            case RsStructField field:
+                GenerateField(field);
+                break;
 
             case RsExpression expression when _context != TranslationContext.Expression:
                 GenerateExpressionStatement(expression);
