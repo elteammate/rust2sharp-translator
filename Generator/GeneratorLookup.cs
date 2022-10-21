@@ -64,6 +64,10 @@ public partial class Generator
                 GenerateFor(@for);
                 break;
             
+            case RsMatch match:
+                GenerateMatch(match);
+                break;
+            
             case RsContinue:
                 GenerateContinue();
                 break;
@@ -85,7 +89,7 @@ public partial class Generator
     private enum TranslationContext
     {
         Module,
-        Function,
+        Block,
         Expression
     }
 

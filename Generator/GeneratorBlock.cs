@@ -91,7 +91,7 @@ public partial class Generator
         using (Context(TranslationContext.Expression)) 
             AddLine("while (true)");
 
-        using (Context(TranslationContext.Function))
+        using (Context(TranslationContext.Block))
             Generate(loop.Body);
     }
 
@@ -100,7 +100,7 @@ public partial class Generator
         using (Context(TranslationContext.Expression)) 
             AddLine("while (%)", @while.Condition);
 
-        using (Context(TranslationContext.Function))
+        using (Context(TranslationContext.Block))
             Generate(@while.Body);
     }
 
@@ -112,7 +112,47 @@ public partial class Generator
         RegisterName(@for.Binding);
         AddAtWaypoint("%", @for.Binding);
         
-        using (Context(TranslationContext.Function))
+        using (Context(TranslationContext.Block))
             Generate(@for.Body);
+    }
+
+    private void GenerateMatchImpl(RsMatch match)
+    {
+        using (Context(TranslationContext.Expression))
+        {
+            AddLine("switch (%)", match.Value.Unwrap());
+            using (Block())
+            {
+                foreach (var arm in match.Arms)
+                {
+                    if (arm.Pattern is RsUnderscore)
+                    {
+                        AddLine("default:");
+                    }
+                    else
+                    {
+                        AddLine("case %:", arm.Pattern);
+                    }
+                    
+                    using (Indent())
+                    {
+                        GenerateExpressionStatement(arm.Body);
+                        AddLine("break;");
+                    }
+                }
+            }
+        }
+    }
+
+    private void GenerateMatch(RsMatch match)
+    {
+        if (_context == TranslationContext.Expression && match.Arms.All(a => a.Body is RsBlock))
+            using (LambdaBlock())
+            using (Block())
+            {
+                GenerateMatchImpl(match);
+            }
+        else
+            GenerateMatchImpl(match);
     }
 }

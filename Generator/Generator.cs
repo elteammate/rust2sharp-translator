@@ -284,7 +284,7 @@ public partial class Generator
         public WithLambdaBlock(Generator generator)
         {
             _generator = generator;
-            _generator.Add("(((%) => ", _generator.GetTempVar());
+            _generator.Add("((%) => ", _generator.GetTempVar());
             _generator.Push();
             _withContext = new WithContext(generator, TranslationContext.Module);
         }
@@ -293,7 +293,7 @@ public partial class Generator
         {
             _withContext.Dispose();
             _generator.Pop();
-            _generator.Add(")(0))");
+            _generator.Add(")(0)");
         }
     }
 }

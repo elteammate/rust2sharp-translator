@@ -40,7 +40,7 @@ public partial class Generator
     {
         var outerContext = _context;
         using var _1 = Block();
-        using var _2 = Context(TranslationContext.Function);
+        using var _2 = Context(TranslationContext.Block);
 
         foreach (var item in block.Statements) Generate(item);
         
